@@ -1,0 +1,189 @@
+.stColumn:nth-of-type(1) button { /*afeta todos os botões das colunas mensagens e formulários*/
+    
+    background-color: black !important;
+    color: white !important;
+    width: 150px;
+    /* border-radius: 15px;     */
+    font-weight: bold;    
+    border: none;
+    position: absolute !important; 
+    top: 50% !important; 
+    left: 50% !important;  
+    transform: translate(-50%, -50%) !important; 
+    margin-top: 20px;
+}
+.stColumn:nth-of-type(2) button { 
+    background-color: black !important;
+    color: white !important;
+    width: 150px;
+    /* border-radius: 15px;     */
+    font-weight: bold;    
+    border: none;
+    position: absolute !important; 
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; 
+    margin-top: 20px;
+
+}
+
+button[kind="primary"] {/*pesquisa*/
+    background-color: #070707;
+    color: white;
+    font-weight: bold;
+    width: 200px;
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+button[kind="primary"]:hover { /*pesquisa*/
+    
+    box-shadow: 0 0 10px rgb(187, 64, 64);
+    font-weight: bold;
+    width: 200px;
+    font-size: 18px;
+    padding: 10px 10px;
+} 
+
+.st-emotion-cache-1dho8c7.enj44ev3{
+    background-color: #273346 !important;   
+    border: none !important; 
+    color:white  !important;
+    
+}
+
+.st-emotion-cache-z22cl0.enj44ev1 :hover {
+    
+    color:white  !important; 
+}
+
+.st-emotion-cache-1vxvi18.e1obcldf2 p {/*resultado da pesquisa*/
+    /* Seus estilos aqui */
+    
+    text-align: left !important;
+    font-size: small;
+    justify-content: flex-start !important;
+    padding: 0%;
+    /* Adicione outros estilos que desejar */
+}
+.st-emotion-cache-1vxvi18.e1obcldf2 {/*resultado da pesquisa*/
+    /* Seus estilos aqui */
+    background: none !important;
+    border: none !important;
+    color: inherit !important; 
+    text-align: left !important;
+    font-size: small;
+    width: 330px !important; 
+    padding: 0%;
+   
+    /* Adicione outros estilos que desejar */
+}
+
+/* Para remover o efeito hover */
+.st-emotion-cache-1vxvi18.e1obcldf2:hover { /*resultado da pesquisa*/
+    /* background: none !important; */
+    background-color: rgb(32, 31, 31) !important; 
+    width: 330px !important; 
+    
+    border: none !important;
+    color: rgb(195, 198, 204) !important;  
+    
+    /* outros estilos que queira manter fixos no hover */
+}
+/* .stDialog{
+    
+    padding: 0px 30px 20px 0;
+    color: white;
+    text-align: center;
+    
+} */
+
+.st-f8{/*aviso*/
+    color: white;
+    
+    width: 360px;
+    height: 400px;
+    background-color: #0f4608 !important; 
+    
+    top: 50% !important;
+    left: 50% !important;
+   
+}
+/* .st-eu {
+
+    width: 360px;
+    height: 300px;
+    background-color: #083946 !important; 
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+   
+} */
+  
+iframe[data-testid="stCustomComponentV1"] {
+    width: 100%; 
+    min-height: 200%;   
+    padding: 0% 0% 0% 0%;  
+    background-color: #f0f8ff !important; 
+}
+
+#text_input_1 {
+    background-color: #f0f8ff !important;
+    border: 1.5px solid #060f06!important;
+    border-radius: 8px;    
+    color: black;
+    font-size: 16px;
+    padding: 10px;
+}
+
+#text_input_2 {
+    
+    background-color: #f0f8ff !important;
+    border: 1.5px solid #060f06!important;
+    border-radius: 8px;
+    
+    color: black;
+    font-size: 16px;
+    padding: 10px;
+}
+
+#text_input_3 {
+   
+    background-color: #f0f8ff !important;
+    border: 1.5px solid #060f06 !important;    
+    border-radius: 8px;
+    color: black;
+    font-size: 16px;
+    padding: 10px;
+}
+
+
+.stForm {
+   
+    border: none; /*2px solid black;*/
+    min-width: 130%;
+    max-height: 100%;
+    
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] {/*quill*/
+
+    border: none;   
+    padding: 0%
+} 
+ 
+
+
+/* 
+div.stHorizontalBlock div.stColumn:nth-of-type(4) button {
+    background-color: black !important;
+    color: white !important;
+    width: 70%;
+    border-radius: 15px;
+    
+    font-weight: bold;
+    margin: 1px -15px;
+    border:  1px solid black;
+} */
