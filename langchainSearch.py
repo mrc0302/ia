@@ -85,7 +85,7 @@ def main():
         try:
             embeddings = OpenAIEmbeddings()
             return FAISS.load_local(
-                "faiss_legal_store_openai", 
+                "faiss_legal_store_gemini", 
                 embeddings, 
                 allow_dangerous_deserialization=True
             )
