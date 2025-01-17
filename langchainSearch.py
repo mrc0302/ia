@@ -3,7 +3,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 import google.generativeai as genai
 from langchain_community.tools import DuckDuckGoSearchRun
-from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
@@ -11,14 +10,15 @@ def main():
     # Carregar variáveis de ambiente
     load_dotenv()
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-    # Configurar as APIs
+    # Configurar o Gemini
     genai.configure(api_key=GOOGLE_API_KEY)
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
     # Configuração da página
     st.set_page_config(page_title="Sistema Legal", layout="wide")
+
+    # # Header da aplicação
+    # st.header("💬 Chat Assistente Jurídico", divider="rainbow")
 
     # Inicializar o mecanismo de busca web
     search = DuckDuckGoSearchRun()
@@ -51,9 +51,6 @@ def main():
     if 'ultimo_modo' not in st.session_state:
         st.session_state.ultimo_modo = 'base_dados'
 
-    if 'modelo_ai' not in st.session_state:
-        st.session_state.modelo_ai = 'gemini'
-
     def get_current_messages():
         if st.session_state.modo_operacao == 'base_dados':
             return st.session_state.messages_base_dados
@@ -85,7 +82,7 @@ def main():
         try:
             embeddings = OpenAIEmbeddings()
             return FAISS.load_local(
-                "faiss_legal_store_gemini", 
+                "faiss_legal_store_openai", 
                 embeddings, 
                 allow_dangerous_deserialization=True
             )
@@ -180,47 +177,6 @@ def main():
             st.error(f"Erro ao extrair campos: {str(e)}")
             return [], []
 
-    def gerar_resposta_openai(prompt):
-        try:
-            response = openai_client.chat.completions.create(
-                model="gpt-4-turbo-preview",
-                messages=[{"role": "system", "content": "Você é um assistente jurídico especializado."},
-                         {"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=2048
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"Erro ao gerar resposta com OpenAI: {str(e)}"
-
-
-    def gerar_resposta_gemini(prompt):
-        try:
-            # Configuração específica para o modelo experimental
-            generation_config = {
-                "temperature": 1,
-                "top_p": 0.95,
-                "top_k": 64,
-                "max_output_tokens": 8192,
-                "response_mime_type": "text/plain",
-            }
-
-            # Criar o modelo com a configuração específica
-            model = genai.GenerativeModel(
-                model_name="learnlm-1.5-pro-experimental",
-                generation_config=generation_config,
-            )
-
-            # Iniciar sessão de chat
-            chat_session = model.start_chat(history=[])
-            
-            # Enviar mensagem e obter resposta
-            response = chat_session.send_message(prompt)
-            
-            return response.text
-        except Exception as e:
-            return f"Erro ao gerar resposta com Gemini: {str(e)}"
-    
     def gerar_resposta(pergunta, contexto_docs, historico, modo_operacao):
         try:
             # Preparar o contexto baseado no modo de operação
@@ -254,11 +210,37 @@ def main():
                 for msg in relevant_history:
                     prompt += f"\n{msg['role']}: {msg['content']}"
 
-            # Gerar resposta com o modelo selecionado
-            if st.session_state.modelo_ai == 'openai':
-                return gerar_resposta_openai(prompt)
-            else:
-                return gerar_resposta_gemini(prompt)
+            # Configurar e gerar resposta com Gemini
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.7,
+                    top_p=0.8,
+                    top_k=40,
+                    max_output_tokens=2048,
+                ),
+                safety_settings=[
+                    {
+                        "category": "HARM_CATEGORY_HARASSMENT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_HATE_SPEECH",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                    {
+                        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    },
+                ]
+            )
+            
+            return response.text
             
         except Exception as e:
             st.error(f"Erro ao gerar resposta: {str(e)}")
@@ -268,17 +250,6 @@ def main():
     if vector_store:
         # Sidebar
         with st.sidebar:
-            # Seletor de modelo AI
-            st.radio(
-                "Modelo de IA:",
-                ['gemini', 'openai'],
-                key='modelo_ai',
-                format_func=lambda x: {
-                    'gemini': '🤖 Google Gemini',
-                    'openai': '🔮 OpenAI GPT-4'
-                }[x]
-            )
-            
             # Seletor de modo de operação
             modo_anterior = st.session_state.modo_operacao
             st.radio(
@@ -339,11 +310,7 @@ def main():
             if st.session_state.modo_operacao == 'base_dados' and st.session_state.documentos_contexto:
                 with st.expander("📚 Documentos Encontrados", expanded=False):
                     st.markdown(f"Total: {len(st.session_state.documentos_contexto)}")
-                    # Documentos no sidebar (apenas no modo base_dados)
-            if st.session_state.modo_operacao == 'base_dados' and st.session_state.documentos_contexto:
-                with st.expander("📚 Documentos Encontrados", expanded=False):
-                    st.markdown(f"Total: {len(st.session_state.documentos_contexto)}")
-                    doc_titles = [f"Assunto: {doc.metadata.get('assunto', 'Sem assunto')}" 
+                    doc_titles = [f"Assunto : {doc.metadata.get('assunto', 'Sem assunto')}" 
                                 for i, doc in enumerate(st.session_state.documentos_contexto)]
                     selected_doc = st.selectbox("Selecione um documento:", doc_titles)
                     
@@ -360,19 +327,13 @@ def main():
         # Área principal do chat
         st.markdown("#### 💬 Chat Assistente Jurídico")
         
-        # Mostrar modo e modelo atual
+        # Mostrar modo atual
         modo_texto = {
             'base_dados': '📚 Modo: Base de Dados',
             'internet': '🌐 Modo: Busca na Internet',
             'vector_direto': '🔍 Modo: Consulta Direta ao Vector'
         }[st.session_state.modo_operacao]
-        
-        modelo_texto = {
-            'gemini': '🤖 Modelo: Google Gemini',
-            'openai': '🔮 Modelo: OpenAI GPT-4'
-        }[st.session_state.modelo_ai]
-        
-        st.info(f"{modo_texto} | {modelo_texto}")
+        st.info(modo_texto)
 
         # Exibir mensagens do chat atual
         current_messages = get_current_messages()
