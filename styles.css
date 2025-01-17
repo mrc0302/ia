@@ -1,0 +1,130 @@
+
+
+button[data-testid="stBaseButton-secondary"] { /* resultado */
+    /*width: 100%;*/
+    text-align: left;
+    padding: 1px;
+    background: none;
+    border: none;
+    background-color: transparent !important; 
+    
+}
+
+button[data-testid="stBaseButton-secondary"] :hover { /* resultado */
+    /*width: 100%;*/
+    color: #2196F3;
+    background: none;
+    border: none;
+    
+} 
+
+button[data-testid="stBaseButton-secondary"] P { /* resultado */
+    /*width: 100%;*/
+    text-align: left;
+    padding: 1px;
+    background: none;
+    border: none;
+    margin: 0;
+    font-size: 12px;
+    color: #282928;
+}
+
+div[data-testid="stCustomComponentV1"] {
+    /* estilos */
+    border:  2px solid black;
+    width: 500%;
+    font-weight: bold;
+}
+.stForm {
+    padding: 20px;
+    border:  2px solid black;
+    width: 100% ;
+    height: 100%;
+}
+
+div.ql-editor.ql-blank{
+    border:  2px solid black;
+    width: 100%;
+    height: 100%;
+}
+.ql-editor {
+    font-size: 18px;  /* Tamanho da fonte */
+    font-family: 'Arial', sans-serif;  /* Família de fontes */
+    line-height: 1.6;  /* Altura da linha */
+    padding: 15px;  /* Preenchimento interno */
+    background-color: #f9f9f9;  /* Cor de fundo */
+    border: 2px solid #4CAF50;  /* Bordas verdes */
+}
+
+/* Estilos para o toolbar do Quill */
+.ql-toolbar {
+    background-color: #4CAF50;  /* Cor de fundo da barra de ferramentas */
+    border-radius: 5px;  /* Bordas arredondadas */
+}
+
+.ql-toolbar button {
+    color: white;  /* Cor do texto nos botões */
+    background-color: #080808;  /* Cor de fundo dos botões */
+    border: none;  /* Sem borda nos botões */
+    padding: 5px 10px;  /* Preenchimento interno dos botões */
+}
+
+/* Quando o editor está vazio */
+.stCustomComponentV1 ql-editor.ql-blank {
+    border: 2px dashed #ccc;  /* Bordas tracejadas */
+    background-color: #fafafa;  /* Fundo mais claro */
+}
+
+div[data-lt-tmp-id="lt-871122"] {
+    background-color: #f0f0f0; /* Cor de fundo */
+    border: 2px solid #4CAF50; /* Borda verde */
+    padding: 10px; /* Preenchimento interno */
+}
+    /*input[aria-label="Assunto:"] {
+    font-weight: bold; 
+}*//* deixa em negrito o input*/ 
+
+div[data-testid="stMarkdownContainer"] p {
+    font-weight: bold;
+}
+
+div.stHorizontalBlock div.stColumn:nth-of-type(1) button {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    width: 70%;
+    border-radius: 15px;
+    font-weight: bold;
+    margin: 1px 40px;
+    border:  1px solid black;
+
+}
+
+div.stHorizontalBlock div.stColumn:nth-of-type(2) button {
+    background-color: #2196F3 !important;
+    color: white !important;
+    width: 70%;
+    border-radius: 15px;
+    font-weight: bold;
+    margin: 1px 30px;
+    border:  1px solid black;
+}
+
+div.stHorizontalBlock div.stColumn:nth-of-type(3) button {
+    background-color: #f44336 !important;
+    color: white !important;
+    width: 70%;
+    border-radius: 15px;
+    font-weight: bold;
+    margin: 1px 10px;
+    border:  1px solid black;
+}
+
+div.stHorizontalBlock div.stColumn:nth-of-type(4) button {
+    background-color: #ff9800 !important;
+    color: white !important;
+    width: 70%;
+    border-radius: 15px;
+    font-weight: bold;
+    margin: 1px -15px;
+    border:  1px solid black;
+}
