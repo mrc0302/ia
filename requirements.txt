@@ -21,9 +21,6 @@ pandas>=2.0.0
 # Processamento de texto
 regex>=2023.12.25
 
-# Segurança
-hmac
-
 # Dependências adicionais para langchainSearchOpenAI.py
 langchain-community[faiss]>=0.0.27
 langchain-openai[embeddings]>=0.0.8
