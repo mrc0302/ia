@@ -54,7 +54,7 @@ def main():
 
     def get_llm():
         return GoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-2.0-flash-exp",
             google_api_key=google_api_key,
             temperature=0.7
         )
