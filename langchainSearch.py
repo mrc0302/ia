@@ -18,11 +18,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 st.set_page_config(page_title="Sistema Legal", layout="wide")
 
 # Carregar arquivo CSS
-def carregar_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-carregar_css("style.css")
 
 # Função para limpar o chat, histórico e resultados
 def limpar_tudo():
