@@ -208,8 +208,7 @@ def main():
                 st.markdown(f"""
                     <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
                         {message["content"]}
-                    </div>
-                    """, unsafe_allow_html=True)
+                                        """, unsafe_allow_html=True)
 
         # Chat input
         if prompt := st.chat_input("O que você gostaria de perguntar?"):
