@@ -1,15 +1,13 @@
 import streamlit as st
-import faiss
 from openai import OpenAI
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAI
-import google.generativeai as genai
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.retrievers import MultiQueryRetriever
+from langchain.chains.question_answering import load_qa_chain
+import google.generativeai as genai
 import os
-import openai
 from dotenv import load_dotenv
-
-
 
 def main():
     # Carregar variáveis de ambiente
@@ -19,7 +17,7 @@ def main():
 
     # Configuração da página
     st.set_page_config(page_title="Sistema Legal", layout="wide")
-    # Função para limpar o chat, histórico e resultados
+
     def limpar_tudo():
         st.session_state.messages = []
         st.session_state.chat_history = []
@@ -62,37 +60,58 @@ def main():
     def gerar_resposta(pergunta, contexto_docs, historico):
         try:
             llm = get_llm()
-            contexto_texto = "\n\n".join([
-                f"Documento {i+1}:\n{doc.page_content}"
-                for i, doc in enumerate(contexto_docs)
-            ])
+            
+            # Configurar o MultiQueryRetriever
+            vector_store = carregar_vector_store()
+            mq_retriever = MultiQueryRetriever.from_llm(
+                retriever=vector_store.as_retriever(),
+                llm=llm
+            )
+            
+            # Adicionar contexto do histórico à pergunta
             historico_texto = "\n".join([
                 f"Humano: {msg['content'] if msg['role'] == 'user' else ''}\nAssistente: {msg['content'] if msg['role'] == 'assistant' else ''}"
                 for msg in historico[-3:]
             ])
-            prompt = f"""Baseado nos seguintes documentos jurídicos e no histórico da conversa, responda à pergunta de forma clara e objetiva.
             
-            Documentos de Referência:
-            {contexto_texto}
-
-            Histórico da Conversa:
+            question = f"""
+            Histórico da conversa:
             {historico_texto}
-
-            Pergunta Atual: {pergunta}
-
-            Responda usando uma linguagem formal e técnica apropriada para o contexto jurídico."""
-            resposta = llm.invoke(prompt)
+            
+            Pergunta atual: {pergunta}
+            """
+            
+            # Recuperar documentos relevantes
+            retrieved_docs = mq_retriever.get_relevant_documents(query=question)
+            
+            # Adicionar instrução para resposta em português
+            question += " responda sempre em português."
+            
+            # Carregar e executar a chain de QA
+            chain = load_qa_chain(llm, chain_type="stuff")
+            resposta = chain.run(input_documents=retrieved_docs, question=question)
+            
             return str(resposta)
         except Exception as e:
             return f"Erro ao gerar resposta: {str(e)}"
 
     def busca_combinada(vector_store, query, campo, valor_campo, texto_livre, num_results):
         try:
-            todos_docs = vector_store.similarity_search("", k=100000)
-            resultados = []
+            # Usar MultiQueryRetriever para busca semântica
+            llm = get_llm()
+            mq_retriever = MultiQueryRetriever.from_llm(
+                retriever=vector_store.as_retriever(),
+                llm=llm
+            )
+            
+            # Aplicar filtros básicos primeiro
+            todos_docs = vector_store.similarity_search("", k=1000)
+            resultados_filtrados = []
+            
             termos_busca = []
             if texto_livre:
                 termos_busca = [termo.strip().upper() for termo in texto_livre.split(',') if termo.strip()]
+            
             for doc in todos_docs:
                 match = True
                 if campo and valor_campo:
@@ -103,38 +122,25 @@ def main():
                     if not all(termo in conteudo for termo in termos_busca):
                         match = False
                 if match:
-                    resultados.append(doc)
-            if query and resultados:
+                    resultados_filtrados.append(doc)
+            
+            # Aplicar busca semântica nos documentos filtrados
+            if query and resultados_filtrados:
                 embeddings = GoogleGenerativeAIEmbeddings(
                     model="models/embedding-001",
                     google_api_key=google_api_key
                 )
-                temp_store = FAISS.from_documents(resultados, embeddings)
-                resultados = temp_store.similarity_search(
-                    query,
-                    k=min(num_results, len(resultados))
-                )
-            return resultados[:num_results]
+                temp_store = FAISS.from_documents(resultados_filtrados, embeddings)
+                query += " responda sempre em português."
+                resultados = mq_retriever.get_relevant_documents(query=query)
+                return resultados[:num_results]
+            
+            return resultados_filtrados[:num_results]
         except Exception as e:
             st.error(f"Erro na busca: {str(e)}")
             return []
 
-    def extrair_campos_unicos(vector_store):
-        try:
-            resultados = vector_store.similarity_search("", k=100000)
-            classes = set()
-            assuntos = set()
-            for doc in resultados:
-                metadata = getattr(doc, 'metadata', {})
-                if metadata.get('classe'):
-                    classes.add(metadata['classe'])
-                if metadata.get('assunto'):
-                    assuntos.add(metadata['assunto'])
-            return sorted(list(classes)), sorted(list(assuntos))
-        except Exception as e:
-            st.error(f"Erro ao extrair campos: {str(e)}")
-            return [], []
-
+    # O resto do código permanece igual...
     vector_store = carregar_vector_store()
     if vector_store:
         # Sidebar
@@ -196,16 +202,24 @@ def main():
         # Área principal do chat
         st.markdown("#### 💬 Chat Assistente Jurídico")
 
-        # Exibir mensagens do chat na área principal
+        # Exibir mensagens do chat
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+                st.markdown(f"""
+                    <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                        {message["content"]}
+                    </div>
+                    """, unsafe_allow_html=True)
 
         # Chat input
         if prompt := st.chat_input("O que você gostaria de perguntar?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
-                st.markdown(prompt)
+                st.markdown(f"""
+                    <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                        {prompt}
+                    
+                    """, unsafe_allow_html=True)
             
             with st.spinner("🤔 Pensando..."):
                 resposta = gerar_resposta(prompt, st.session_state.documentos_contexto, st.session_state.chat_history)
@@ -216,12 +230,14 @@ def main():
                 ])
                 
             with st.chat_message("assistant"):
-                st.markdown(resposta)
+                st.markdown(f"""
+                    <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                        {resposta}
+                    
+                    """, unsafe_allow_html=True)
 
     else:
         st.error("Não foi possível carregar o vector store")
-
-
 
 if __name__ == "__main__":
     main()
