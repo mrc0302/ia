@@ -42,7 +42,7 @@ def main():
         }
 
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-exp",
+            model_name="gemini-2.0-flash-thinking-exp-01-21",
             generation_config=generation_config
         )
         return model
@@ -218,7 +218,7 @@ def main():
             llm = get_llm()
             vector_store = carregar_vector_store()            
             #mq_retriever = get_mq_retriever(vector_store, llm)   
-
+            contexto_completo=""
             # Realizar busca na web apenas se o toggle estiver ativado
             if st.session_state.use_web_search:
                 web_results = ""
@@ -250,8 +250,9 @@ def main():
                         except:
                             page_content =""
                             pass
-                #contexto_completo = f"{page_content}"   
+                contexto_completo = f"{page_content}"   
                 vector_store= get_temp_store(page_content)
+
                 #mq_retriever= get_mq_retriever(vector_store, llm)    
                 
                 # if docs:
@@ -268,7 +269,7 @@ def main():
                         for i, doc in enumerate(contexto_docs)
                     ])
                 
-                #contexto_completo = f"{contexto_texto}"                
+                contexto_completo = f"{contexto_docs}"                
                 vector_store= get_temp_store(contexto_docs)
                 #mq_retriever= get_mq_retriever(vector_store, llm)    
            
@@ -280,7 +281,7 @@ def main():
                         f"Arquivo Carregado {i+1} - {arquivo['name']}:\n{arquivo['content'][:3000]}"
                         for i, arquivo in enumerate(uploaded_files)
                     ])
-                #contexto_completo = f"{arquivos_texto}"                
+                contexto_completo = f"{arquivos_texto}"                
                 vector_store= get_temp_store(arquivos_texto)
                 #mq_retriever= get_mq_retriever(vector_store, llm)         
             
@@ -292,7 +293,7 @@ def main():
             #retrieved_docs = mq_retriever.get_relevant_documents(query=question)
             
             # # Adicionar instrução para resposta em português
-            query += " responda sempre em português."
+            query += f" responda sempre em português. <contexto>{contexto_completo}</contexto>"
             
             # # Carregar e executar a chain de QA
             chain = load_qa_chain(llm, chain_type="stuff")
