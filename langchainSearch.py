@@ -284,7 +284,7 @@ def main():
                 contexto_completo = f"{arquivos_texto}"                
                 vector_store= get_temp_store(arquivos_texto)
                 #mq_retriever= get_mq_retriever(vector_store, llm)         
-            
+                 
             # Recuperar documentos relevantes
 
             retriever = vector_store.as_retriever()
@@ -293,7 +293,7 @@ def main():
             #retrieved_docs = mq_retriever.get_relevant_documents(query=question)
             
             # # Adicionar instrução para resposta em português
-            query += f" responda sempre em português. <contexto>{contexto_completo}</contexto>"
+            query += f" responda sempre em português. <contexto>{contexto_completo}</contexto> \n\n histórico de conversas {historico}"
             
             # # Carregar e executar a chain de QA
             chain = load_qa_chain(llm, chain_type="stuff")
@@ -305,100 +305,6 @@ def main():
         
         except Exception as e:
             return f"Erro ao gerar resposta: {str(e)}"
-
-    # def gerar_resposta2(query, contexto_docs, historico, uploaded_files):
-    #     try:
-            
-    #         llm = get_llm()
-    #         vector_store = carregar_vector_store()            
-    #         #mq_retriever = get_mq_retriever(vector_store, llm)   
-
-    #         if 'chat_history' in st.session_state:
-    #             last_three = st.session_state.chat_history[-3:]
-
-    #         # Realizar busca na web apenas se o toggle estiver ativado
-    #         if st.session_state.use_web_search:
-    #             web_results = ""
-    #             if st.session_state.get('web_search_toggle', True):
-    #                 with st.spinner("Buscando informações na web..."):
-    #                     web_search_results = perform_web_search(query)
-    #                     if web_search_results and not web_search_results.startswith("Erro"):
-    #                         web_results = f"\n\nInformações da Web:\n{web_search_results}"
-
-    #             contexto_completo = f"{web_results}"
-    #             vector_store= get_temp_store(contexto_completo)
-
-    #             #mq_retriever= get_mq_retriever(vector_store, llm)                
-            
-    #         elif st.session_state.use_juris_search :
-                                            
-    #             resultados = re.findall(r'\((.*?)\)', prompt)
-    #                 #q=cancelamento+de+voo
-    #             url = f"https://www.jusbrasil.com.br/jurisprudencia/busca?q={resultados}"
-                
-    #             for _ in range(5):
-    #                     try:
-    #                         scraper = cloudscraper.create_scraper()
-    #                         response = scraper.get(url)
-    #                         time.sleep(2)
-    #                         if "Just a moment" not in response.text:
-    #                             soup = BeautifulSoup(response.text, 'html.parser')
-    #                             page_content = soup.get_text(separator='\n', strip=True)
-    #                     except:
-    #                         page_content =""
-    #                         pass
-    #             #contexto_completo = f"{page_content}"   
-    #             vector_store= get_temp_store(page_content)
-    #             #mq_retriever= get_mq_retriever(vector_store, llm)    
-                
-    #             # if docs:
-    #             # #    #web_results =  docs   #st.text_area(" ", docs, height=300)
-    #             # # #st.markdown (docs, unsafe_allow_html=True)
-    #             #     st.text_area(" ", docs, height=300)          
-
-    #         elif st.session_state.documentos_contexto:    
-    #             # Formatando contexto dos documentos do vector store
-    #             contexto_texto = ""
-    #             if contexto_docs:
-    #                 contexto_docs = "\n\n".join([
-    #                     f"Documento do Vector Store {i+1}:\n<assunto> {doc.metadata.get('assunto', 'N/A')}</assunto>\n<texto>: {doc.page_content}</texto>"
-    #                     for i, doc in enumerate(contexto_docs)
-    #                 ])
-                
-    #             #contexto_completo = f"{contexto_texto}"                
-    #             vector_store= get_temp_store(contexto_docs)
-    #             #mq_retriever= get_mq_retriever(vector_store, llm)    
-            
-    #         elif st.session_state.uploaded_files:
-    #             # Adicionando conteúdo dos arquivos carregados
-    #             arquivos_texto = ""
-    #             if uploaded_files:
-    #                 arquivos_texto = "\n\n".join([
-    #                     f"{arquivo['content']}"
-    #                     for i, arquivo in enumerate(uploaded_files)
-    #                 ])
-    #             #contexto_completo = f"{arquivos_texto}"                
-    #             vector_store= get_temp_store(arquivos_texto)
-    #             #mq_retriever= get_mq_retriever(vector_store, llm)         
-            
-    #         # Recuperar documentos relevantes
-
-    #         retriever = vector_store.as_retriever()
-    #         retrieved_docs = retriever.get_relevant_documents(query, top_k=2 , score_threshold=0.9)           
-    #         #arquivos_texto = "\n\n".join(doc.page_content for i, doc in enumerate(retrieved_docs))                                 
-            
-    #         # # Adicionar instrução para resposta em português
-    #         query += " responda sempre em português."
-            
-    #         # # # Carregar e executar a chain de QA
-    #         chain = load_qa_chain(llm, chain_type="stuff")
-    #         resposta = chain.run(input_documents=retrieved_docs, question=query) 
-           
-    #         return str(f'{resposta} \n\n {last_three}' )
-        
-    #     except Exception as e:
-    #         return f"Erro ao gerar resposta: {str(e)}"
-
 
     def busca_combinada(vector_store, query, campo, valor_campo, texto_livre, num_results):
         try:
@@ -591,12 +497,12 @@ def main():
 
             with st.chat_message("assistant", avatar="⚖️"):
                
-               # st.write_stream(stream_data(resposta))
+                st.write_stream(stream_data(resposta))
                 
-                st.markdown(f"""
-                    <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
-                       💬 {resposta}                    
-                    """, unsafe_allow_html=True)              
+                #st.markdown(f"""
+                 #   <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                  #     💬 {resposta}                    
+                   # """, unsafe_allow_html=True)              
                 st.session_state.messages.append({"role": "assistant", "content": f" 💬 {resposta}"})
                 st.session_state.chat_history.extend([
                     {'role': 'user', 'content': prompt},
