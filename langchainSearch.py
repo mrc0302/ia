@@ -469,11 +469,12 @@ def main():
         for message in st.session_state.messages:
             with st.chat_message("user" if message["role"] == "user" else "assistant", 
                                avatar="👨" if message["role"] == "user" else "⚖️"):               
-                st.markdown(f"""
-                    <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
-                        {message["content"]}
-                    </div>
-                    """, unsafe_allow_html=True)
+                #st.markdown(f"""
+                    #<div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                     #   {message["content"]}
+                    #</div>
+                    #""", unsafe_allow_html=True)
+                st.write(message["content"])
 
         # Chat input
         if prompt := st.chat_input("O que você gostaria de perguntar?"):
