@@ -16,7 +16,7 @@
     
     background-color: black !important;
     color: white !important;
-    width: 150px;
+    width: 180px;
     /* border-radius: 15px;     */
     font-weight: bold;    
     border: none;
@@ -29,7 +29,7 @@
 .stColumn:nth-of-type(2) button { 
     background-color: black !important;
     color: white !important;
-    width: 150px;
+    width: 180px;
     /* border-radius: 15px;     */
     font-weight: bold;    
     border: none;
