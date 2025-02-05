@@ -148,7 +148,7 @@ div.stHorizontalBlock div.stColumn:nth-of-type(3) button {
 div.stHorizontalBlock div.stColumn:nth-of-type(4) button {
     background-color: #ff9800 !important;
     color: white !important;
-    width: 70%;
+    width: 150px;
     border-radius: 15px;
     font-weight: bold;
     margin: 1px -15px;
