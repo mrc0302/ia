@@ -20,6 +20,7 @@ faiss-cpu>=1.7.4
 
 # UI
 streamlit>=1.31.0
+streamlit-option-menu>=0.3.12
 
 # Utilities
 python-dotenv>=1.0.0
