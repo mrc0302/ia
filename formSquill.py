@@ -23,6 +23,35 @@ from docx.enum.text import WD_COLOR_INDEX
 
 
 def main():
+
+
+    
+    st.markdown("""
+        <style>
+            .main {
+                overflow: hidden;
+            }
+            .block-container {
+                padding-top: 1rem;
+                padding-bottom: 0rem;
+                height: 100vh;
+            }
+            footer {
+                display: none;
+            }
+            #MainMenu {
+                visibility: hidden;
+            }
+            header {
+                visibility: hidden;
+            }
+            
+                
+            
+        </style>
+    """, unsafe_allow_html=True)
+
+    
     def transform_results_to_items(results):
         # Agrupar por classe
         classes = {}
