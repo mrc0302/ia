@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import formSquill as fs
+from formSquill import main 
+
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import rag as rg
