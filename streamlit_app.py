@@ -88,7 +88,7 @@ selected = option_menu(
 # Lógica das páginas
 if selected == "Formulário":
     
-    fs.main()
+    main()
 
 elif selected == "Chatbot Jurídico":
     
