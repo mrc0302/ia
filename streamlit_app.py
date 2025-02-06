@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from formSquill import main 
+import formSquill as fs 
 
 #import langchainSearch as ls
 #import conversorRTF_HTML as crtf
@@ -88,7 +88,7 @@ selected = option_menu(
 # Lógica das páginas
 if selected == "Formulário":
     
-    main()
+    fs.main()
 
 elif selected == "Chatbot Jurídico":
     print("marcio")
