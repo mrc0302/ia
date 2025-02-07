@@ -2,9 +2,9 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import formSquill as fs 
 
-#import langchainSearch as ls
-#import conversorRTF_HTML as crtf
-#import rag as rg
+import langchainSearch as ls
+import conversorRTF_HTML as crtf
+import rag as rg
 
 
 
@@ -91,16 +91,16 @@ if selected == "Formulário":
     fs.main()
 
 elif selected == "Chatbot Jurídico":
-    print("marcio")
-    #rg.main() 
+    
+    rg.main() 
     
 elif selected == "Conversor de banco de dados":
-    print("marcio")
-    #crtf.main()
+    
+    crtf.main()
 
 elif selected == "Pesquisa Avançada":
-    print("marcio")
-    #ls.main()
+    
+    ls.main()
     
 
 
