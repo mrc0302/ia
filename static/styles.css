@@ -1,4 +1,40 @@
+.main .block-container {
+    padding: 1rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
+/* Estilo para containers individuais */
+.element-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #3f0b0b;
+  border-radius: 4px;
+}
+
+/* Estilo para o container da sidebar */
+.css-1d391kg {
+  padding: 1rem;
+  background-color: #f8f9fa;
+}
+
+/* Estilo para containers dentro do conteúdo principal */
+.stApp > .main .element-container {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+.quill 
+.ql-snow, .ql-snow *{
+    border: 5px solid #c42424;
+    box-sizing: border-box;
+    font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    padding: 8px;}
+
+/*     
 .form_submit_button {
     background-color: black !important;
     color: white !important;
