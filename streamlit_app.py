@@ -1,13 +1,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import formSquill as fs 
-
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import rag as rg
-
-
-
 
 #st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
 st.set_page_config(
@@ -88,19 +84,19 @@ selected = option_menu(
 # Lógica das páginas
 if selected == "Formulário":
     
-   fs.main()
+    fs.main()
 
 elif selected == "Chatbot Jurídico":
     
-   rg.main() 
+    rg.main() 
     
 elif selected == "Conversor de banco de dados":
     
-   crtf.main()
+    crtf.main()
 
 elif selected == "Pesquisa Avançada":
     
-   ls.main()
+    ls.main()
     
 
 
