@@ -1,169 +1,189 @@
-import streamlit as st
-import pandas as pd
-import google.generativeai as genai
-from dotenv import load_dotenv
-import os
-from google.api_core import retry
+# Configuração da página Streamlit
+st.set_page_config(page_title="RAG App com Gemini", layout="wide")
+st.title("Aplicação RAG com Google Gemini")
 
-def main():
-    # Configuração da página Streamlit
+# Carregar variáveis de ambiente
+load_dotenv()
+google_api_key = os.getenv("google_api_key")
+
+# Configurar Gemini
+genai.configure(api_key=google_api_key)
+embedding_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+# Create the model
+generation_config = {
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 65536,
+  "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-2.0-flash-thinking-exp-01-21",
+  generation_config=generation_config,
+)
+# Inicializar o modelo Gemini
+#model = genai.GenerativeModel('gemini-2.0-flash-thinking-exp-01-21')
+
+# Função para processar arquivo CSV e criar documentos
+def process_csv(file_path):
     
-    st.title("Visualização e Pesquisa em CSV")
+    df = pd.read_csv(file_path)
+    documents = []
+    
+    for _, row in df.iterrows():
+        content = f"ID: {row['id']}\nAssunto: {row['assunto']}\nClasse: {row['classe']}\nTexto: {row['texto']}"
+        doc = Document(
+            page_content=content,
+            metadata={
+                'id': row['id'],
+                'assunto': row['assunto'],
+                'classe': row['classe']
+            }
+        )
+        documents.append(doc)
+    
+    return documents
 
-    # Carregar variáveis de ambiente
-    load_dotenv()
-    google_api_key = os.getenv("google_api_key")
-
-    # Configurar Gemini com tratamento de erro
+# Função para carregar e processar documentos
+@st.cache_resource
+def create_vector_store(_documents, _vector_db_path):
     try:
-        if google_api_key:
-            genai.configure(api_key=google_api_key)
-            model = genai.GenerativeModel('gemini-pro')
-            gemini_available = True
-        else:
-            gemini_available = False
-    except Exception:
-        gemini_available = False
-
-    def search_in_dataframe(df, query, columns_to_search=['assunto', 'texto']):
-        """
-        Realiza uma busca case-insensitive no DataFrame
-        """
-        combined_mask = pd.Series([False] * len(df))
+        # Dividir documentos
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+        chunks = text_splitter.split_documents(_documents)
         
-        for column in columns_to_search:
-            if column in df.columns:
-                mask = df[column].astype(str).str.contains(query, case=False, na=False)
-                combined_mask |= mask
+        # Criar Vector Store
+        vector_store = FAISS.from_documents(chunks, embedding_model)
         
-        return df[combined_mask]
+        # Salvar Vector Store
+        vector_store.save_local(_vector_db_path)
+        
+        return vector_store
+    except Exception as e:
+        st.error(f"Erro ao processar documentos: {str(e)}")
+        return None
 
-    @retry.Retry(predicate=retry.if_exception_type(Exception))
-    def generate_response(query, context):
-        """
-        Gera resposta com retry em caso de erro
-        """
-        try:
-            prompt = f"""
-            Contexto: {context}
-            
-            Pergunta: {query}
-            
-            Por favor, responda à pergunta acima usando apenas as informações fornecidas no contexto.
-            Se a informação não estiver disponível no contexto, diga que não pode responder.
-            
-            Resposta:
-            """
-            
-            response = model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            st.warning(f"Erro ao gerar resposta com Gemini: {str(e)}")
-            return None
+# Função para carregar Vector Store existente
+@st.cache_resource
+def load_vector_store(_vector_db_path):
+    try:
+        return FAISS.load_local(_vector_db_path, embedding_model)
+    except Exception as e:
+        st.error(f"Erro ao carregar Vector Store: {str(e)}")
+        return None
 
-    # Interface Streamlit
-    st.sidebar.header("Configurações")
+# Função para recuperar chunks relevantes
+def retrieve_relevant_chunks(vector_store, query, top_k=5):
+    return vector_store.similarity_search(query, k=top_k)
 
-    # Indicador de status do Gemini
-    if gemini_available:
-        st.sidebar.success("Gemini API disponível")
-    else:
-        st.sidebar.warning("Gemini API não disponível - Modo somente visualização")
+# Função para gerar resposta
+def generate_response(query, context):
+    prompt = f"""
+    Contexto: {context}
+    
+    Pergunta: {query}
+    
+    Por favor, responda à pergunta acima usando apenas as informações fornecidas no contexto.
+    Se a informação não estiver disponível no contexto, diga que não pode responder.
+    
+    Resposta:
+    """
+    
+    response = model.generate_content(prompt)
+    return response.text
 
+# Interface Streamlit
+st.sidebar.header("Configurações")
+
+# Seleção do modo de operação
+mode = st.sidebar.radio(
+    "Escolha o modo de operação:",
+    ["Criar nova base de conhecimento", "Usar base existente"]
+)
+
+if mode == "Criar nova base de conhecimento":
     # Upload do arquivo CSV
     uploaded_file = st.sidebar.file_uploader(
         "Faça upload do arquivo CSV",
         type=['csv']
     )
-
-    # Layout em duas colunas
-    col1, col2 = st.columns([2, 1])
-
-    if uploaded_file:
-        try:
-            # Carregar o DataFrame
-            df = pd.read_csv(uploaded_file)
-            
-            # Mostrar informações sobre o DataFrame
-            with st.sidebar:
-                st.write("Informações do arquivo:")
-                st.write(f"Total de registros: {len(df)}")
-                st.write(f"Colunas disponíveis: {', '.join(df.columns)}")
-            
-            # Seleção de colunas para pesquisa
-            columns_to_search = st.sidebar.multiselect(
-                "Selecione as colunas para pesquisa:",
-                df.columns,
-                default=['assunto', 'texto'] if 'assunto' in df.columns and 'texto' in df.columns else []
-            )
-            
-            # Número de registros por página
-            rows_per_page = st.sidebar.slider('Registros por página:', 5, 50, 10)
-            
-            # Exibir todos os registros na primeira coluna
-            with col1:
-                st.subheader("Registros")
+    
+    # Campo para digitar o caminho do diretório
+    vector_db_path = st.sidebar.text_input(
+        "Digite o caminho completo para salvar a base vetorial:",
+        value="./vector_db",
+        help="Exemplo: C:/MeuProjeto/vector_db"
+    )
+    
+    if uploaded_file and vector_db_path:
+        if st.sidebar.button("Criar Base de Conhecimento"):
+            try:
+                # Criar diretório se não existir
+                os.makedirs(vector_db_path, exist_ok=True)
                 
-                # Adicionar campos de filtro para cada coluna
-                filters = {}
-                col_filters = st.columns(3)  # Organiza filtros em 3 colunas
-                for i, column in enumerate(df.columns):
-                    with col_filters[i % 3]:
-                        if df[column].dtype == 'object':  # Para colunas de texto
-                            unique_values = ['Todos'] + sorted(df[column].unique().tolist())
-                            selected = st.selectbox(f'Filtrar {column}:', unique_values)
-                            if selected != 'Todos':
-                                filters[column] = selected
-
-                # Aplicar filtros
-                filtered_df = df.copy()
-                for column, value in filters.items():
-                    filtered_df = filtered_df[filtered_df[column] == value]
-
-                # Paginação manual
-                total_pages = len(filtered_df) // rows_per_page + (1 if len(filtered_df) % rows_per_page else 0)
-                current_page = st.number_input('Página', min_value=1, max_value=total_pages, value=1) - 1
-                start_idx = current_page * rows_per_page
-                end_idx = start_idx + rows_per_page
+                # Salvar arquivo CSV temporariamente
+                csv_path = os.path.join(".", uploaded_file.name)
+                with open(csv_path, 'wb') as f:
+                    f.write(uploaded_file.getvalue())
                 
-                # Exibir DataFrame paginado
-                st.dataframe(filtered_df.iloc[start_idx:end_idx], use_container_width=True)
-                st.write(f"Página {current_page + 1} de {total_pages}")
-            
-            # Interface de pesquisa na segunda coluna
-            with col2:
-                st.subheader("Pesquisa")
-                query = st.text_input("Digite sua pesquisa:")
+                # Processar CSV e criar documentos
+                documents = process_csv(csv_path)
                 
-                if query:
-                    with st.spinner("Pesquisando..."):
-                        # Realizar a busca
-                        results = search_in_dataframe(filtered_df, query, columns_to_search)
-                        
-                        st.write(f"Encontrados {len(results)} resultados:")
-                        
-                        if not results.empty:
-                            # Exibir resultados filtrados
-                            st.subheader("Resultados da pesquisa:")
-                            st.dataframe(results, use_container_width=True)
-                            
-                            # Gerar resposta com Gemini se disponível
-                            if gemini_available:
-                                context = "\n\n".join([
-                                    f"ID: {row['id']}\nAssunto: {row['assunto']}\nClasse: {row['classe']}\nTexto: {row['texto']}"
-                                    for _, row in results.iterrows()
-                                ])
-                                
-                                response = generate_response(query, context)
-                                if response:
-                                    st.subheader("Análise do Gemini:")
-                                    st.write(response)
-                        else:
-                            st.warning("Nenhum resultado encontrado para sua pesquisa.")
-                        
-        except Exception as e:
-            st.error(f"Erro ao processar o arquivo: {str(e)}")
-    else:
-        st.info("Por favor, faça upload de um arquivo CSV para começar.")
-if __name__ == "__main__":
-    main()
+                # Criar Vector Store
+                vector_store = create_vector_store(documents, vector_db_path)
+                
+                # Limpar arquivo CSV temporário
+                os.remove(csv_path)
+                
+                if vector_store:
+                    st.success("Base de conhecimento criada com sucesso!")
+                    st.session_state['vector_store'] = vector_store
+                    st.session_state['vector_db_path'] = vector_db_path
+            except Exception as e:
+                st.error(f"Erro ao criar base de conhecimento: {str(e)}")
+
+else:
+    # Campo para digitar o caminho do diretório existente
+    vector_db_path = st.sidebar.text_input(
+        "Digite o caminho da base vetorial existente:",
+        help="Exemplo: C:/MeuProjeto/vector_db"
+    )
+    
+    if vector_db_path:
+        if st.sidebar.button("Carregar Base de Conhecimento"):
+            vector_store = load_vector_store(vector_db_path)
+            if vector_store:
+                st.success("Base de conhecimento carregada com sucesso!")
+                st.session_state['vector_store'] = vector_store
+                st.session_state['vector_db_path'] = vector_db_path
+
+# Interface de consulta
+if 'vector_store' in st.session_state:
+    query = st.text_input("Digite sua pergunta:")
+    
+    if query:
+        with st.spinner("Processando sua pergunta..."):
+            try:
+                # Recuperar chunks relevantes
+                relevant_chunks = retrieve_relevant_chunks(st.session_state['vector_store'], query)
+                context = "\n".join([chunk.page_content for chunk in relevant_chunks])
+                
+                # Gerar resposta
+                response = generate_response(query, context)
+                
+                # Exibir resultados
+                st.subheader("Resposta:")
+                st.write(response)
+                
+                # Exibir contexto usado (opcional)
+                with st.expander("Ver contexto utilizado"):
+                    st.write(context)
+            except Exception as e:
+                st.error(f"Erro ao processar a pergunta: {str(e)}")
+else:
+    st.info("Por favor, crie uma nova base de conhecimento ou selecione uma existente para começar.")
