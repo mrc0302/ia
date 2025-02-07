@@ -29,9 +29,9 @@ def main():
           page_icon="🧊", 
           layout="wide",  
           initial_sidebar_state="expanded"
-     )
+    )
     
-    st.markdown("""
+    st.markdown("
         <style>
             .main {
                 overflow: hidden;
@@ -49,12 +49,10 @@ def main():
             }
             header {
                 visibility: hidden;
-            }
-            
-                
+            }   
             
         </style>
-    """, unsafe_allow_html=True)
+    ", unsafe_allow_html=True)
 
     
     def transform_results_to_items(results):
