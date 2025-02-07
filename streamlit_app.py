@@ -88,19 +88,19 @@ selected = option_menu(
 # Lógica das páginas
 if selected == "Formulário":
     
-    fs.main()
+   fs.main()
 
 elif selected == "Chatbot Jurídico":
     
-    rg.main() 
+   rg.main() 
     
 elif selected == "Conversor de banco de dados":
     
-    crtf.main()
+   crtf.main()
 
 elif selected == "Pesquisa Avançada":
     
-    ls.main()
+   ls.main()
     
 
 
