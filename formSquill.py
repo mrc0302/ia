@@ -24,7 +24,7 @@ from docx.enum.text import WD_COLOR_INDEX
 
 def main():
 
-     st.set_page_config(
+    st.set_page_config(
           page_title="Ex-stream-ly Cool App",
           page_icon="🧊", 
           layout="wide",  
