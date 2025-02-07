@@ -11,7 +11,7 @@ from langchain_core.documents import Document
 def main():
 
     # Configuração da página Streamlit
-    st.set_page_config(page_title="RAG App com Gemini", layout="wide")
+    #st.set_page_config(page_title="RAG App com Gemini", layout="wide")
     st.title("Aplicação RAG com Google Gemini")
 
     # Carregar variáveis de ambiente
