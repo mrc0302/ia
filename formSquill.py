@@ -15,12 +15,7 @@ from docx.enum.text import WD_COLOR_INDEX
 
 def main():
 
-    # Configuração da página deve ser o primeiro comando Streamlit
-    st.set_page_config(
-        page_title="Ex-stream-ly Cool App",
-        page_icon="🧊", 
-        layout="wide"          
-    ) 
+    #
     st.markdown("""
         <style>
             .main {
