@@ -1,12 +1,12 @@
 import streamlit as st
 
 # Configuração da página deve ser o primeiro comando Streamlit
-# st.set_page_config(
-#     page_title="Ex-stream-ly Cool App",
-#     page_icon="🧊", 
-#     layout="wide",  
-#     initial_sidebar_state="expanded"
-# )
+st.set_page_config(
+     page_title="Ex-stream-ly Cool App",
+     page_icon="🧊", 
+     layout="wide",  
+     initial_sidebar_state="expanded"
+)
 
 import time
 from streamlit_quill import st_quill
