@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAI
 import google.generativeai as genai
