@@ -5,9 +5,6 @@ import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import stRAG as rg
 
-
-
-
 st.markdown("""
     <style>
         .main {
@@ -48,9 +45,6 @@ st.markdown("""
 #     st.title(f"You have selected {selected}")
 # if selected == "Projects":
 #     st.title(f"You have selected {selected}")
-
-
-
 
 st.markdown(f"""<header tabindex="-1" class="stAppHeader st-emotion-cache-12fmjuu e10jh26i0"><center><h2>💬 Chat Assistente Jurídico</h2></center></header> 
     """,
