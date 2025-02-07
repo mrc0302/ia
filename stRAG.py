@@ -7,7 +7,7 @@ from google.api_core import retry
 
 def main():
     # Configuração da página Streamlit
-    st.set_page_config(page_title="Pesquisa em CSV", layout="wide")
+    
     st.title("Visualização e Pesquisa em CSV")
 
     # Carregar variáveis de ambiente
