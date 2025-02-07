@@ -3,7 +3,7 @@ from streamlit_option_menu import option_menu
 import formSquill as fs 
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
-import rag as rg
+import stRAG.py as rg
 
 #st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
 st.set_page_config(
