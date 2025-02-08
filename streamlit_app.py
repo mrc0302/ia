@@ -4,8 +4,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import os
-import tkinter as tk
-from tkinter import filedialog
 from dotenv import load_dotenv
 import pandas as pd
 from langchain_core.documents import Document
