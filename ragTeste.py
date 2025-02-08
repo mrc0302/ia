@@ -4,8 +4,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import os
-import tkinter as tk
-from tkinter import filedialog
+# import tkinter as tk
+# from tkinter import filedialog
 from dotenv import load_dotenv
 import pandas as pd
 from langchain_core.documents import Document
@@ -51,15 +51,15 @@ def save_knowledge_bases(bases):
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(bases, f, ensure_ascii=False, indent=4)
 
-def select_save_directory():
-    """Open a file dialog to select save directory"""
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    directory = filedialog.askdirectory(
-        title="Selecione o diretório para salvar a base de conhecimento",
-        initialdir=BASE_DIR
-    )
-    return directory
+# def select_save_directory():
+#     """Open a file dialog to select save directory"""
+#     root = tk.Tk()
+#     root.withdraw()  # Hide the main window
+#     directory = filedialog.askdirectory(
+#         title="Selecione o diretório para salvar a base de conhecimento",
+#         initialdir=BASE_DIR
+#     )
+#     return directory
 
 def process_text_file(file_content: str) -> List[Document]:
     """Process plain text content"""
