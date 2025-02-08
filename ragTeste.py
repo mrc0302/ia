@@ -557,8 +557,7 @@ def handle_query():
         st.info("Por favor, crie uma nova base de conhecimento ou selecione uma existente para começar.")
 
 def main():
-    st.set_page_config(page_title="RAG App com Gemini", layout="wide")
-    st.title("Aplicação RAG com Google Gemini")
+    
 
     initialize_session_state()
 
