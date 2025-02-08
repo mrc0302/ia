@@ -1,4 +1,23 @@
 import streamlit as st
+import google.generativeai as genai
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import os
+import tkinter as tk
+from tkinter import filedialog
+from dotenv import load_dotenv
+import pandas as pd
+from langchain_core.documents import Document
+import json
+from typing import List
+import docx
+import PyPDF2
+from bs4 import BeautifulSoup
+import io
+import shutil
+from typing import Dict, Any
+import streamlit as st
 from streamlit_option_menu import option_menu
 import formSquill as fs 
 import langchainSearch as ls
