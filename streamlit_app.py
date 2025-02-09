@@ -15,13 +15,13 @@ from bs4 import BeautifulSoup
 import io
 import shutil
 from typing import Dict, Any
-import streamlit as st
 from streamlit_option_menu import option_menu
 import formSquill as fs 
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import  ragTeste as rg
-
+import importlib
+import hmac
 
 st.set_page_config(page_title="RAG App com Gemini", layout="wide")
 st.title("Aplicação RAG com Google Gemini")
@@ -50,7 +50,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
+PAGES = {
+   
+    "chatbot": "ragTeste"    
+}
 #page = st_navbar(["Home", "Documentation", "Examples", "Community", "About"])
 #st.write(page)
 
@@ -95,8 +98,9 @@ if selected == "Formulário":
     fs.main()
 
 elif selected == "Chatbot Jurídico":
-    
-    rg.main() 
+    module = importlib.import_module(PAGES["chatbot"])
+    module.main()
+#rg.main() 
     
 elif selected == "Conversor de banco de dados":
     
