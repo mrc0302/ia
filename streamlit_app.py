@@ -22,6 +22,9 @@ import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import  ragTeste as rg
 
+
+st.set_page_config(page_title="RAG App com Gemini", layout="wide")
+st.title("Aplicação RAG com Google Gemini")
 st.markdown("""
     <style>
         .main {
