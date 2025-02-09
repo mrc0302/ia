@@ -50,11 +50,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-PAGES = {
-   
-    "chatbot": "ragTeste"    
-}
-#page = st_navbar(["Home", "Documentation", "Examples", "Community", "About"])
+
+page = st_navbar(["Home", "Documentation", "Examples", "Community", "About"])
 #st.write(page)
 
 
