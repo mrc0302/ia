@@ -69,7 +69,7 @@ PAGES = {
 # if selected == "Projects":
 #     st.title(f"You have selected {selected}")
 
-st.markdown(f"""<header tabindex="-1" class="stAppHeader st-emotion-cache-12fmjuu e10jh26i0"><center><h2>💬 Chat Assistente Jurídico</h2></center></header> 
+st.markdown(f"""<header tabindex="-1" class="stAppHeader st-emotion-cache-12fmjuu e10jh26i0"><center><h2>module = importlib.import_module(PAGES["chatbot"])  module.main() 💬 Chat Assistente Jurídico</h2></center></header> 
     """,
     unsafe_allow_html=True
 )
@@ -92,7 +92,7 @@ selected = option_menu(
     }
 )
 
-module = importlib.import_module(PAGES["chatbot"])
+
 # Lógica das páginas
 if selected == "Formulário":
     
@@ -100,7 +100,7 @@ if selected == "Formulário":
 
 elif selected == "Chatbot Jurídico":
    
-    module.main()
+   
 #rg.main() 
     
 elif selected == "Conversor de banco de dados":
