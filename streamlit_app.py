@@ -49,12 +49,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-# if selected == "Home":
-#     st.title(f"You have selected {selected}")
-# if selected == "Projects":
-#     st.title(f"You have selected {selected}")
-
 st.markdown(f"""<header tabindex="-1" class="stAppHeader st-emotion-cache-12fmjuu e10jh26i0"><center><h2> 💬 Chat Assistente Jurídico</h2></center></header> 
     """,
     unsafe_allow_html=True
@@ -88,6 +82,11 @@ elif selected == "Conversor de banco de dados":
     
     crtf.main()
 
+elif selected == "Chatbot Jurídico":
+
+    pg = st.navigation([st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖")])
+    pg.run()
+
 elif selected == "Pesquisa Avançada":
     
     ls.main()
@@ -97,8 +96,7 @@ elif selected == "Pesquisa Avançada":
 
 
 # st.header("Bem-vindo ao Langchain Search")
-pg = st.navigation([st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖")])
-pg.run()
+
         
     
    
