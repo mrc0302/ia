@@ -55,8 +55,6 @@ st.markdown("""
 # if selected == "Projects":
 #     st.title(f"You have selected {selected}")
 
-module = importlib.import_module(PAGES["chatbot"]) 
-module.main()
 st.markdown(f"""<header tabindex="-1" class="stAppHeader st-emotion-cache-12fmjuu e10jh26i0"><center><h2> 💬 Chat Assistente Jurídico</h2></center></header> 
     """,
     unsafe_allow_html=True
