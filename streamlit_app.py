@@ -97,11 +97,6 @@ selected = option_menu(
 if selected == "Formulário":
     
     fs.main()
-
-elif selected == "Chatbot Jurídico":
-   
-   
-#rg.main() 
     
 elif selected == "Conversor de banco de dados":
     
