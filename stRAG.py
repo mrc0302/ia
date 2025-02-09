@@ -37,7 +37,7 @@ def main():
         vector_db_path = st.session_state.get('vector_db_path', '')
         
         if uploaded_file and vector_db_path:
-            if st.sidebar.button("Criar Base de Conhecimento"):
+             if st.sidebar.button("Criar Base de Conhecimento"):
                 # Rest of the code remains the same...
                 
     else:
