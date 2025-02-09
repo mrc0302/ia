@@ -20,8 +20,7 @@ import formSquill as fs
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
 import  ragTeste as rg
-import importlib
-import hmac
+
 
 st.set_page_config(page_title="RAG App com Gemini", layout="wide")
 st.title("Aplicação RAG com Google Gemini")
@@ -50,16 +49,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-page = st_navbar(["Home", "Documentation", "Examples", "Community", "About"])
-#st.write(page)
-
-
-# with st.sidebar:
-#     selected = option_menu(
-#         menu_title="Main Menu",  # required
-#         options=["Home", "Projects", "Contact"],  # required
-#     )
 
 # if selected == "Home":
 #     st.title(f"You have selected {selected}")
@@ -110,11 +99,8 @@ elif selected == "Pesquisa Avançada":
 
 
 # st.header("Bem-vindo ao Langchain Search")
-# pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
-#                     st.Page("rag.py",title= "Chatbot RAG", icon="🤖"), 
-#                     st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
-#                     st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
-# pg.run()
+pg = st.navigation([st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖")])
+pg.run()
         
     
    
