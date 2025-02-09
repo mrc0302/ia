@@ -20,7 +20,7 @@ from typing import Dict, Any
 
 
 # Diretório base para as bases de conhecimento
-BASE_DIR = os.path.normpath(r"C:/Users/mcres/Documents/base de conhecimento/")
+BASE_DIR = os.path.normpath(r"./base de conhecimento/")
 os.makedirs(BASE_DIR, exist_ok=True)
 # Verificar permissões
 if not os.access(BASE_DIR, os.W_OK):
@@ -557,7 +557,8 @@ def handle_query():
         st.info("Por favor, crie uma nova base de conhecimento ou selecione uma existente para começar.")
 
 def main():
-    
+    # st.set_page_config(page_title="RAG App com Gemini", layout="wide")
+    # st.title("Aplicação RAG com Google Gemini")
 
     initialize_session_state()
 
