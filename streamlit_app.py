@@ -92,13 +92,14 @@ selected = option_menu(
     }
 )
 
+module = importlib.import_module(PAGES["chatbot"])
 # Lógica das páginas
 if selected == "Formulário":
     
     fs.main()
 
 elif selected == "Chatbot Jurídico":
-    module = importlib.import_module(PAGES["chatbot"])
+   
     module.main()
 #rg.main() 
     
