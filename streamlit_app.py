@@ -9,11 +9,6 @@ import conversorRTF_HTML as crtf
 
 
 #st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
-st.set_page_config(
-    page_title="Meu App",
-    page_icon="🎈",    
-    layout="wide"       
-)
 
 # st.markdown("""
 #     <style>
