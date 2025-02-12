@@ -43,7 +43,7 @@ st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
 #with st.sidebar:
 
     
-pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
+pg = st.navigation([st.Page(ls, title= "Pesquisa Avançada por IA", icon="🎯"), 
                       st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
                       st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
                          st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
