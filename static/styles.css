@@ -1,42 +1,6 @@
-.main .block-container {
-    padding: 1rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
 
-/* Estilo para containers individuais */
-.element-container {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 1px solid #3f0b0b;
-  border-radius: 4px;
-}
-
-/* Estilo para o container da sidebar */
-.css-1d391kg {
-  padding: 1rem;
-  background-color: #f8f9fa;
-}
-
-/* Estilo para containers dentro do conteúdo principal */
-.stApp > .main .element-container {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 6px;
-}
-.quill 
-.ql-snow, .ql-snow *{
-    border: 5px solid #c42424;
-    box-sizing: border-box;
-    font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-    padding: 8px;}
-
-/*     
-.form_submit_button {
-    background-color: black !important;
+.form_submit_button {/*engloba o checkbox também*/
+    /*background-color: black !important;*/
     color: white !important;
     width: 150px;
     /* border-radius: 15px;     */
@@ -52,7 +16,7 @@
     
     background-color: black !important;
     color: white !important;
-    width: 180px;
+    width: 150px;
     /* border-radius: 15px;     */
     font-weight: bold;    
     border: none;
@@ -65,7 +29,7 @@
 .stColumn:nth-of-type(2) button { 
     background-color: black !important;
     color: white !important;
-    width: 180px;
+    width: 150px;
     /* border-radius: 15px;     */
     font-weight: bold;    
     border: none;
@@ -185,14 +149,14 @@ div[aria-label="dialog"] {
     background-color: #050505 !important; 
 }
 
-  
-iframe[data-testid="stCustomComponentV1"] {
-    min-width: 100%; 
-    min-height: 100%;
-    height: 900px;   
+/*   container */ 
+iframe[data-testid="stCustomComponentV1"] {   
+    /* min-width: 100%; 
+    min-height: 100%; */
+    /* height: 900px;    */
     padding: 0% 0% 0% 0%;  
     background-color: #f0f8ff !important; 
-}
+} 
 
 .stTextInput input {
     
