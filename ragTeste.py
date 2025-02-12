@@ -350,7 +350,7 @@ def handle_query():
         st.info("Selecione ou crie uma base primeiro")
 
 # Configuração principal da aplicação
-st.set_page_config(page_title="RAG App", layout="wide")
+#st.set_page_config(page_title="RAG App", layout="wide")
 st.title("RAG App com Google Gemini")
 
 initialize_session_state()
