@@ -45,14 +45,14 @@ st.set_page_config(
 # )
 
 
-with st.sidebar:
+#with st.sidebar:
 
     
-    pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
-                         st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
-                         st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
-                         st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
-    pg.run()   
+ #   pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
+  #                       st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
+   #                      st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
+    #                     st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
+#pg.run()   
     # selected = option_menu(
     #     menu_title="Menu Principal",  # required
     #     options=["Formulário", "Pesquisa Avançada", "Chatbot Jurídico"],  # required
@@ -68,39 +68,39 @@ with st.sidebar:
 
 
 
-# selected = option_menu(
-#     menu_title=None,
-#     options=["Formulário", "Chatbot Jurídico", "Pesquisa Avançada","Conversor de banco de dados"], # Você pode alterar estas opções
-#     icons=["house", "file-text", "eye"],         # E estes ícones
-#     default_index=0,                             # Página inicial (0 = primeiro item)
-#     orientation="horizontal",                     # Navegação horizontal
-#     styles={
-#         "nav-link": {
-#             "font-size": "14px",
-#             "text-align": "center",
-#             "margin": "0px",
-#             "--hover-color": "#eee",
-#         },
-#         "nav-link-selected": {"background-color": "#0083B8"},
-#     }
-# )
+selected = option_menu(
+     menu_title=None,
+     options=["Formulário", "Chatbot Jurídico", "Pesquisa Avançada","Conversor de banco de dados"], # Você pode alterar estas opções
+     icons=["house", "file-text", "eye"],         # E estes ícones
+     default_index=0,                             # Página inicial (0 = primeiro item)
+     orientation="horizontal",                     # Navegação horizontal
+     styles={
+         "nav-link": {
+             "font-size": "14px",
+             "text-align": "center",
+             "margin": "0px",
+             "--hover-color": "#eee",
+         },
+         "nav-link-selected": {"background-color": "#0083B8"},
+     }
+ )
 
 # # Lógica das páginas
-# if selected == "Formulário":
+if selected == "Formulário":
     
-#     fs.main()
+   fs
 
-# elif selected == "Chatbot Jurídico":
+elif selected == "Chatbot Jurídico":
     
-#     rg.main() 
+   rg 
     
-# elif selected == "Conversor de banco de dados":
+elif selected == "Conversor de banco de dados":
     
-#     crtf.main()
+   crtf
 
-# elif selected == "Pesquisa Avançada":
+elif selected == "Pesquisa Avançada":
    
-#     ls.main()
+    ls
     
 
 
