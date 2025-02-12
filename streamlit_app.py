@@ -52,7 +52,7 @@ with st.sidebar:
                          st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
                          st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
                          st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
-pg.run()   
+    pg.run()   
     # selected = option_menu(
     #     menu_title="Menu Principal",  # required
     #     options=["Formulário", "Pesquisa Avançada", "Chatbot Jurídico"],  # required
