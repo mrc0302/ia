@@ -8,7 +8,7 @@ import conversorRTF_HTML as crtf
 
 
 
-#st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
+st.set_page_config(page_title="Gerenciador de Modelos Judiciais", layout="wide")
 
 # st.markdown("""
 #     <style>
@@ -43,11 +43,11 @@ import conversorRTF_HTML as crtf
 #with st.sidebar:
 
     
- #   pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
-  #                       st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
-   #                      st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
-    #                     st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
-#pg.run()   
+pg = st.navigation([st.Page("langchainSearch.py", title= "Pesquisa Avançada por IA", icon="🎯"), 
+                      st.Page("ragTeste.py",title= "Chatbot RAG", icon="🤖"), 
+                      st.Page("formSquill.py",title= "Tela de Formulário", icon="📝") , 
+                         st.Page("conversorRTF_HTML.py",title= "Conversor de banco de dados RTF para HTML", icon="📄")])
+pg.run()   
     # selected = option_menu(
     #     menu_title="Menu Principal",  # required
     #     options=["Formulário", "Pesquisa Avançada", "Chatbot Jurídico"],  # required
