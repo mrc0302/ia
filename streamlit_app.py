@@ -3,7 +3,7 @@ from streamlit_option_menu import option_menu
 import formSquill as fs
 import langchainSearch as ls
 import conversorRTF_HTML as crtf
-import ragTeste as rg
+#import ragTeste as rg
 
 
 
@@ -92,7 +92,7 @@ if selected == "Formulário":
 
 elif selected == "Chatbot Jurídico":
     
-   rg 
+   st.write("chabot") 
     
 elif selected == "Conversor de banco de dados":
     
