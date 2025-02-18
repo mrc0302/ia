@@ -1,17 +1,11 @@
-# streamlit_app.py
 
 import hmac
 import streamlit as st
-
 import importlib
 
 PAGES = {
 
-    "Home": "index",
-    "Pesquisa": "langchainSearch",
-    
-    #,
-    #"Consulta por IA": "Page2",
+    "index": "streamlit_app",       
 }
 
 
@@ -58,5 +52,5 @@ if not check_password():
 # Importa e executa a página selecionada
 #module = importlib.import_module(PAGES[page])
 #module = importlib.import_module((PAGES.keys())[1])
-module = importlib.import_module(PAGES["Pesquisa"])
+module = importlib.import_module(PAGES["index"])
 module.main()
