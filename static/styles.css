@@ -1,4 +1,19 @@
 
+.st-key-search button {  
+
+    background-color: rgb(211, 31, 31) !important;
+    color: white !important;
+    width: 150px !important;
+}
+
+button[kind="primary"]:hover { /*pesquisa*/
+    
+    box-shadow: 0 0 10px rgb(187, 64, 64);
+    font-weight: bold!important;
+    width: 150px !important;    
+    
+} 
+
 .form_submit_button {/*engloba o checkbox também*/
     /*background-color: black !important;*/
     color: white !important;
@@ -12,20 +27,7 @@
     transform: translate(-50%, -50%) !important; 
     margin-top: 20px;
 }
-.stColumn:nth-of-type(1) button { /*afeta todos os botões das colunas mensagens e formulários*/
-    
-    background-color: black !important;
-    color: white !important;
-    width: 150px;
-    /* border-radius: 15px;     */
-    font-weight: bold;    
-    border: none;
-    position: absolute !important; 
-    top: 50% !important; 
-    left: 50% !important;  
-    transform: translate(-50%, -50%) !important; 
-    margin-top: 20px;   
-}
+
 .stColumn:nth-of-type(2) button { 
     background-color: black !important;
     color: white !important;
@@ -41,20 +43,19 @@
    
 }
 
-button[kind="primary"] {/*pesquisa*/
+button[kind="secondary"] {/*pesquisa resultado*/
     
     background-color: #070707;   
-    width: 200px;
-    font-size: 16px;
-    padding: 10px 20px;
-    border-radius: 10px;
+    color: white !important;
+    width: 400px!important;    
+    /* padding: 10px 20px; */
+    border-radius: 10px!important;;
 }
 
-button[kind="primary"] p {/*pesquisa*/
+button[kind="secondary"] p {/*pesquisa*/
     
-    color: white;
-    font-weight: bold;
-    font-size: 16px!important; 
+    color: white;   
+    font-size: 10px!important; 
     
 }
 
@@ -65,14 +66,7 @@ button[kind="primary"] p {/*pesquisa*/
     width: 300px;
 }
 
-button[kind="primary"]:hover { /*pesquisa*/
-    
-    box-shadow: 0 0 10px rgb(187, 64, 64);
-    font-weight: bold!important;
-    width: 200px!important;
-    font-size: smaller!important;
-    padding: 10px 10px!important;
-} 
+
 
 .st-emotion-cache-1dho8c7.enj44ev3{
     background-color: #273346 !important;   
@@ -118,7 +112,7 @@ button[kind="primary"]:hover { /*pesquisa*/
 .stDialog button {   
    
     font-weight: bold !important; 
-    position: absolute !important;
+   /* position: absolute !important;*/
 
 }
 
@@ -204,9 +198,9 @@ iframe[data-testid="stCustomComponentV1"] {
 .stForm {
    
     border: none; /*2px solid black;*/
-    min-width: 150%;
-    min-height: 300%;
-    
+    width: 1200px;
+    height: 500px;
+   
 }
 
 [data-testid="stVerticalBlockBorderWrapper"] {/*quill*/
