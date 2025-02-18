@@ -9,115 +9,112 @@ from typing import List, Tuple
 
 
 
-
-
-# Adicione esta verificação de Pandoc no início
-try:
-    pypandoc.get_pandoc_version()
-except OSError:
-    st.warning("Instalando Pandoc... Aguarde.")
-    pypandoc.download_pandoc()
-    st.success("Pandoc instalado com sucesso!")
-
-  
-    
-def connect_to_db(db_path: str) -> sqlite3.Connection:
-   """Estabelece conexão com o banco de dados"""
-   try:
-       conn = sqlite3.connect(db_path)
-       return conn
-   except Exception as e:
-       raise Exception(f"Erro ao conectar ao banco de dados: {str(e)}")
-
-def get_records_to_convert(conn: sqlite3.Connection) -> List[Tuple]:
-   """Recupera registros para conversão"""
-   try:
-       cursor = conn.cursor()
-       cursor.execute("""
-           SELECT id, img 
-           FROM tbAssunto 
-           WHERE img IS NOT NULL 
-           AND img <> ''
-       """)
-       return cursor.fetchall()
-   except Exception as e:
-       raise Exception(f"Erro ao recuperar registros: {str(e)}")
-
-def update_html_column(conn: sqlite3.Connection, id: int, html_content: str) -> None:
-   """Atualiza a coluna html"""
-   try:
-       cursor = conn.cursor()
-       cursor.execute(
-           "UPDATE tbAssunto SET html = ? WHERE id = ?",
-           (html_content, id)
-       )
-       conn.commit()
-   except Exception as e:
-       raise Exception(f"Erro ao atualizar registro {id}: {str(e)}")
-
-def extract_color_table(rtf_content: str) -> dict:
-   """Extrai a tabela de cores do RTF"""
-   color_dict = {}
-   color_match = re.search(r'\\colortbl;(.*?);', rtf_content)
-   if color_match:
-       colors = color_match.group(1).split(';')
-       for i, color in enumerate(colors):
-           rgb_match = re.search(r'\\red(\d+)\\green(\d+)\\blue(\d+)', color)
-           if rgb_match:
-               r, g, b = map(int, rgb_match.groups())
-               color_dict[f'\\cf{i}'] = f'rgb({r}, {g}, {b})'
-   return color_dict
-
-def process_rtf_colors(html_content: str, color_table: dict) -> str:
-   """Processa as cores no HTML gerado"""
-   for color_cmd, rgb_value in color_table.items():
-       html_content = html_content.replace(
-           f'class="{color_cmd}"',
-           f'style="color: {rgb_value};"'
-       )
-   return html_content
-
-def convert_rtf_to_html(rtf_content: str) -> str:
-   """Converte RTF para HTML usando pypandoc e processa o resultado"""
-   try:
-       color_table = extract_color_table(rtf_content)
-       
-       with tempfile.NamedTemporaryFile(mode='w', suffix='.rtf', delete=False, encoding='utf-8') as tmp_file:
-           tmp_file.write(rtf_content)
-           tmp_path = tmp_file.name
-       
-       try:
-           html_content = pypandoc.convert_file(
-               tmp_path,
-               'html',
-               format='rtf',
-               extra_args=['--wrap=none']
-           )
-           
-           html_content = process_rtf_colors(html_content, color_table)
-           
-           html_content = re.sub(
-               r'<(p|h[1-6])[^>]*>',
-               r'<\1 class="ql-align-justify">',
-               html_content
-           )
-           
-           html_content = re.sub(r'</?body[^>]*>', '', html_content)
-           html_content = re.sub(r'</?html[^>]*>', '', html_content)
-           html_content = re.sub(r'<head>.*?</head>', '', html_content, flags=re.DOTALL)
-           
-           return html_content.strip()
-           
-       finally:
-           if os.path.exists(tmp_path):
-               os.unlink(tmp_path)
-               
-   except Exception as e:
-       raise Exception(f"Erro na conversão: {str(e)}")
-
-
 def main():
-    #st.set_page_config(page_title="Conversor RTF para HTML", page_icon="🔄")
+    # Adicione esta verificação de Pandoc no início
+    try:
+        pypandoc.get_pandoc_version()
+    except OSError:
+        st.warning("Instalando Pandoc... Aguarde.")
+        pypandoc.download_pandoc()
+        st.success("Pandoc instalado com sucesso!")
+        
+    def connect_to_db(db_path: str) -> sqlite3.Connection:
+    
+        try:
+            conn = sqlite3.connect(db_path)
+            return conn
+        except Exception as e:
+            raise Exception(f"Erro ao conectar ao banco de dados: {str(e)}")
+
+    def get_records_to_convert(conn: sqlite3.Connection) -> List[Tuple]:
+        """Recupera registros para conversão"""
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, img 
+                FROM tbAssunto 
+                WHERE img IS NOT NULL 
+                AND img <> ''
+            """)
+            return cursor.fetchall()
+        except Exception as e:
+            raise Exception(f"Erro ao recuperar registros: {str(e)}")
+
+    def update_html_column(conn: sqlite3.Connection, id: int, html_content: str) -> None:
+        """Atualiza a coluna html"""
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE tbAssunto SET html = ? WHERE id = ?",
+                (html_content, id)
+            )
+            conn.commit()
+        except Exception as e:
+            raise Exception(f"Erro ao atualizar registro {id}: {str(e)}")
+
+    def extract_color_table(rtf_content: str) -> dict:
+        """Extrai a tabela de cores do RTF"""
+        color_dict = {}
+        color_match = re.search(r'\\colortbl;(.*?);', rtf_content)
+        if color_match:
+            colors = color_match.group(1).split(';')
+            for i, color in enumerate(colors):
+                rgb_match = re.search(r'\\red(\d+)\\green(\d+)\\blue(\d+)', color)
+                if rgb_match:
+                    r, g, b = map(int, rgb_match.groups())
+                    color_dict[f'\\cf{i}'] = f'rgb({r}, {g}, {b})'
+        return color_dict
+
+    def process_rtf_colors(html_content: str, color_table: dict) -> str:
+        """Processa as cores no HTML gerado"""
+        for color_cmd, rgb_value in color_table.items():
+            html_content = html_content.replace(
+                f'class="{color_cmd}"',
+                f'style="color: {rgb_value};"'
+            )
+        return html_content
+
+    def convert_rtf_to_html(rtf_content: str) -> str:
+        """Converte RTF para HTML usando pypandoc e processa o resultado"""
+        try:
+            color_table = extract_color_table(rtf_content)
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.rtf', delete=False, encoding='utf-8') as tmp_file:
+                tmp_file.write(rtf_content)
+                tmp_path = tmp_file.name
+            
+            try:
+                html_content = pypandoc.convert_file(
+                    tmp_path,
+                    'html',
+                    format='rtf',
+                    extra_args=['--wrap=none']
+                )
+                
+                html_content = process_rtf_colors(html_content, color_table)
+                
+                html_content = re.sub(
+                    r'<(p|h[1-6])[^>]*>',
+                    r'<\1 class="ql-align-justify">',
+                    html_content
+                )
+                
+                html_content = re.sub(r'</?body[^>]*>', '', html_content)
+                html_content = re.sub(r'</?html[^>]*>', '', html_content)
+                html_content = re.sub(r'<head>.*?</head>', '', html_content, flags=re.DOTALL)
+                
+                return html_content.strip()
+                
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                    
+        except Exception as e:
+            raise Exception(f"Erro na conversão: {str(e)}")
+
+
+    #def main():
+        #st.set_page_config(page_title="Conversor RTF para HTML", page_icon="🔄")
 
     st.title("Conversor RTF para HTML")
 
