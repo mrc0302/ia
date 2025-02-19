@@ -18,12 +18,6 @@ from time import sleep
 import logging
 
 
-#Configure a página como primeiro comando Streamlit
-st.set_page_config(
-    page_title="RAG App com Google Gemini",
-    layout="wide"
-)
-
 # Variáveis globais
 embedding_model = None
 model = None
