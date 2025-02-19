@@ -382,12 +382,12 @@ with col2:
         ["Criar base", "Usar base existente", "Deletar base"]
     )
 
-    if mode == "Criar base":
-        create_new_knowledge_base()
-    elif mode == "Usar base existente":
-        use_existing_bases()
-    else:
-        delete_knowledge_base()
+    #if mode == "Criar base":
+     #   create_new_knowledge_base()
+    #elif mode == "Usar base existente":
+      #  use_existing_bases()
+    #else:
+     #   delete_knowledge_base()
  
 def main():
 
