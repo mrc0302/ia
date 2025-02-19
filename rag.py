@@ -31,15 +31,7 @@ def main():
 
     initialize_session_state()
     
-    def get_available_bases(base_dir):
-        """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
-        bases = {}
-        if os.path.exists(base_dir):
-            for base_name in os.listdir(base_dir):
-                base_path = os.path.join(base_dir, base_name)
-                if os.path.isdir(base_path) and os.path.exists(os.path.join(base_path, "index.faiss")):
-                    bases[base_name] = base_path
-        return bases
+   
 
     def process_text_file(file_content: str) -> List[Document]:
         """Process plain text content"""
