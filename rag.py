@@ -38,7 +38,7 @@ def main():
             st.session_state['confirm_delete'] = False
         if 'base_dir' not in st.session_state:
            st.session_state['base_dir'] = ""
-
+    initialize_session_state()
     def get_available_bases(base_dir):
         """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
         bases = {}
