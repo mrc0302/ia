@@ -18,18 +18,17 @@ from time import sleep
 import logging
 
 
-def main():
+#Configure a página como primeiro comando Streamlit
+st.set_page_config(
+    page_title="RAG App com Google Gemini",
+    layout="wide"
+)
 
-    
-    
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    
-    # Use em pontos críticos:
-    logger.info("Iniciando carregamento da base")
-    col1, col2 = st.columns([1, 2])
+# Variáveis globais
+embedding_model = None
+model = None
 
-    def initialize_session_state():
+def initialize_session_state():
         if 'vector_store' not in st.session_state:
             st.session_state['vector_store'] = None
         if 'confirm_delete' not in st.session_state:
@@ -39,6 +38,17 @@ def main():
         if 'initialized' not in st.session_state:
             initialize_session_state()
             st.session_state['initialized'] = True
+
+def main():
+   
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    # Use em pontos críticos:
+    logger.info("Iniciando carregamento da base")
+    col1, col2 = st.columns([1, 2])
+
+    
         
     initialize_session_state()
     def get_available_bases(base_dir):
