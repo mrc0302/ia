@@ -17,198 +17,203 @@ from uuid import uuid4
 from time import sleep
 import logging
 
+# Configure a página como primeiro comando Streamlit
+st.set_page_config(
+    page_title="RAG App com Google Gemini",
+    layout="wide"
+)
 
 # Variáveis globais
 embedding_model = None
 model = None
 
-def initialize_session_state():
-        if 'vector_store' not in st.session_state:
-            st.session_state['vector_store'] = None
-        if 'confirm_delete' not in st.session_state:
-            st.session_state['confirm_delete'] = False
-        if 'base_dir' not in st.session_state:
-           st.session_state['base_dir'] = ""
-        if 'initialized' not in st.session_state:
-            initialize_session_state()
-            st.session_state['initialized'] = True
+def setup_session_state():
+    """Inicializa as variáveis de estado da sessão"""
+    if 'vector_store' not in st.session_state:
+        st.session_state['vector_store'] = None
+    if 'confirm_delete' not in st.session_state:
+        st.session_state['confirm_delete'] = False
+    if 'base_dir' not in st.session_state:
+        st.session_state['base_dir'] = ""
+    if 'initialized' not in st.session_state:
+        st.session_state['initialized'] = True
+
+def get_available_bases(base_dir):
+    """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
+    bases = {}
+    if os.path.exists(base_dir):
+        for base_name in os.listdir(base_dir):
+            base_path = os.path.join(base_dir, base_name)
+            if os.path.isdir(base_path) and os.path.exists(os.path.join(base_path, "index.faiss")):
+                bases[base_name] = base_path
+    return bases
+
+def process_text_file(file_content: str) -> List[Document]:
+    """Process plain text content"""
+    if not file_content.strip():
+        raise ValueError("O arquivo de texto está vazio")
+    return [Document(page_content=file_content)]
+
+def process_docx(file_content: bytes) -> List[Document]:
+    """Process DOCX file content"""
+    try:
+        doc = docx.Document(io.BytesIO(file_content))
+        text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+        if not text.strip():
+            raise ValueError("O documento Word está vazio")
+        return [Document(page_content=text)]
+    except Exception as e:
+        raise ValueError(f"Erro ao processar arquivo DOCX: {str(e)}")
+
+def process_pdf(file_content: bytes) -> List[Document]:
+    """Process PDF file content"""
+    try:
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
+        text = "\n".join([page.extract_text() for page in pdf_reader.pages])
+        if not text.strip():
+            raise ValueError("O arquivo PDF está vazio ou não contém texto extraível")
+        return [Document(page_content=text)]
+    except Exception as e:
+        raise ValueError(f"Erro ao processar arquivo PDF: {str(e)}")
+
+def process_html(file_content: str) -> List[Document]:
+    """Process HTML file content"""
+    try:
+        soup = BeautifulSoup(file_content, 'html.parser')
+        text = soup.get_text(separator="\n", strip=True)
+        if not text:
+            raise ValueError("O arquivo HTML está vazio ou não contém texto")
+        return [Document(page_content=text)]
+    except Exception as e:
+        raise ValueError(f"Erro ao processar arquivo HTML: {str(e)}")
+
+def process_csv(file_content: bytes) -> List[Document]:
+    """Process CSV file content"""
+    try:
+        df = pd.read_csv(io.BytesIO(file_content))
+        documents = []
+        
+        required_columns = ['id', 'assunto', 'classe', 'texto']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        
+        if missing_columns:
+            raise ValueError(f"Colunas obrigatórias ausentes no CSV: {', '.join(missing_columns)}")
+        
+        df = df.fillna('')
+        
+        for _, row in df.iterrows():
+            content = (
+                f"ID: {row['id']}\n"
+                f"Assunto: {row['assunto']}\n"
+                f"Classe: {row['classe']}\n"
+                f"Texto: {row['texto']}"
+            )
+            
+            doc = Document(
+                page_content=content,
+                metadata={
+                    'id': str(row['id']),
+                    'assunto': str(row['assunto']),
+                    'classe': str(row['classe'])
+                }
+            )
+            documents.append(doc)
+            
+        if not documents:
+            raise ValueError("Nenhum documento válido foi encontrado no CSV")
+            
+        return documents
+        
+    except pd.errors.EmptyDataError:
+        raise ValueError("O arquivo CSV está vazio")
+    except Exception as e:
+        raise ValueError(f"Erro ao processar o CSV: {str(e)}")
+
+def process_uploaded_file(uploaded_file) -> List[Document]:
+    """Process uploaded file based on its type"""
+    try:
+        st.write(f"Processando arquivo: {uploaded_file.name}")
+        file_type = uploaded_file.type
+        file_content = uploaded_file.getvalue()
+        
+        if not file_content:
+            raise ValueError("O arquivo está vazio")
+        
+        st.write(f"Tamanho do arquivo: {len(file_content)} bytes")
+        
+        if file_type == "text/csv":
+            return process_csv(file_content)
+        elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return process_docx(file_content)
+        elif file_type == "application/pdf":
+            return process_pdf(file_content)
+        elif file_type == "text/html":
+            return process_html(file_content.decode('utf-8'))
+        elif file_type == "text/plain":
+            return process_text_file(file_content.decode('utf-8'))
+        else:
+            raise ValueError(f"Tipo de arquivo não suportado: {file_type}")
+            
+    except Exception as e:
+        st.error(f"Erro ao processar o arquivo: {str(e)}")
+        raise
+
+def create_vector_store(documents, vector_db_path):
+    """Create and save vector store"""
+    try:
+        os.makedirs(vector_db_path, exist_ok=True)
+        
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=800,
+            chunk_overlap=200,
+        )
+        
+        st.write("Dividindo documentos...")
+        chunks = text_splitter.split_documents(documents)
+        st.write(f"Total de chunks: {len(chunks)}")
+        
+        st.write("Criando vector store...")
+        vector_store = FAISS.from_documents(chunks, embedding_model)
+        
+        st.write("Salvando vector store...")
+        vector_store.save_local(vector_db_path)
+        
+        # Verificação final
+        if not os.path.exists(os.path.join(vector_db_path, "index.faiss")):
+            raise FileNotFoundError("Falha ao salvar vector store")
+            
+        return vector_store
+        
+    except Exception as e:
+        st.error(f"Erro ao criar vector store: {str(e)}")
+        if os.path.exists(vector_db_path):
+            shutil.rmtree(vector_db_path)
+        return None
+
+def load_vector_store(vector_db_path):
+    """Load vector store from disk"""
+    try:
+        return FAISS.load_local(
+            vector_db_path, 
+            embedding_model,
+            allow_dangerous_deserialization=True
+        )
+    except Exception as e:
+        st.error(f"Erro ao carregar vector store: {str(e)}")
+        return None
 
 def main():
-   
+    # Configure o logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
+    logger.info("Iniciando aplicação RAG")
     
-    # Use em pontos críticos:
-    logger.info("Iniciando carregamento da base")
+    # Inicialize o estado da sessão uma única vez
+    setup_session_state()
+    
+    # Crie as colunas para o layout
     col1, col2 = st.columns([1, 2])
-
     
-        
-    initialize_session_state()
-    def get_available_bases(base_dir):
-        """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
-        bases = {}
-        if os.path.exists(base_dir):
-            for base_name in os.listdir(base_dir):
-                base_path = os.path.join(base_dir, base_name)
-                if os.path.isdir(base_path) and os.path.exists(os.path.join(base_path, "index.faiss")):
-                    bases[base_name] = base_path
-        return bases
-
-    def process_text_file(file_content: str) -> List[Document]:
-        """Process plain text content"""
-        if not file_content.strip():
-            raise ValueError("O arquivo de texto está vazio")
-        return [Document(page_content=file_content)]
-
-    def process_docx(file_content: bytes) -> List[Document]:
-        """Process DOCX file content"""
-        try:
-            doc = docx.Document(io.BytesIO(file_content))
-            text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-            if not text.strip():
-                raise ValueError("O documento Word está vazio")
-            return [Document(page_content=text)]
-        except Exception as e:
-            raise ValueError(f"Erro ao processar arquivo DOCX: {str(e)}")
-
-    def process_pdf(file_content: bytes) -> List[Document]:
-        """Process PDF file content"""
-        try:
-            pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
-            text = "\n".join([page.extract_text() for page in pdf_reader.pages])
-            if not text.strip():
-                raise ValueError("O arquivo PDF está vazio ou não contém texto extraível")
-            return [Document(page_content=text)]
-        except Exception as e:
-            raise ValueError(f"Erro ao processar arquivo PDF: {str(e)}")
-
-    def process_html(file_content: str) -> List[Document]:
-        """Process HTML file content"""
-        try:
-            soup = BeautifulSoup(file_content, 'html.parser')
-            text = soup.get_text(separator="\n", strip=True)
-            if not text:
-                raise ValueError("O arquivo HTML está vazio ou não contém texto")
-            return [Document(page_content=text)]
-        except Exception as e:
-            raise ValueError(f"Erro ao processar arquivo HTML: {str(e)}")
-
-    def process_csv(file_content: bytes) -> List[Document]:
-        """Process CSV file content"""
-        try:
-            df = pd.read_csv(io.BytesIO(file_content))
-            documents = []
-            
-            required_columns = ['id', 'assunto', 'classe', 'texto']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            
-            if missing_columns:
-                raise ValueError(f"Colunas obrigatórias ausentes no CSV: {', '.join(missing_columns)}")
-            
-            df = df.fillna('')
-            
-            for _, row in df.iterrows():
-                content = (
-                    f"ID: {row['id']}\n"
-                    f"Assunto: {row['assunto']}\n"
-                    f"Classe: {row['classe']}\n"
-                    f"Texto: {row['texto']}"
-                )
-                
-                doc = Document(
-                    page_content=content,
-                    metadata={
-                        'id': str(row['id']),
-                        'assunto': str(row['assunto']),
-                        'classe': str(row['classe'])
-                    }
-                )
-                documents.append(doc)
-                
-            if not documents:
-                raise ValueError("Nenhum documento válido foi encontrado no CSV")
-                
-            return documents
-            
-        except pd.errors.EmptyDataError:
-            raise ValueError("O arquivo CSV está vazio")
-        except Exception as e:
-            raise ValueError(f"Erro ao processar o CSV: {str(e)}")
-
-    def process_uploaded_file(uploaded_file) -> List[Document]:
-        """Process uploaded file based on its type"""
-        try:
-            st.write(f"Processando arquivo: {uploaded_file.name}")
-            file_type = uploaded_file.type
-            file_content = uploaded_file.getvalue()
-            
-            if not file_content:
-                raise ValueError("O arquivo está vazio")
-            
-            st.write(f"Tamanho do arquivo: {len(file_content)} bytes")
-            
-            if file_type == "text/csv":
-                return process_csv(file_content)
-            elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                return process_docx(file_content)
-            elif file_type == "application/pdf":
-                return process_pdf(file_content)
-            elif file_type == "text/html":
-                return process_html(file_content.decode('utf-8'))
-            elif file_type == "text/plain":
-                return process_text_file(file_content.decode('utf-8'))
-            else:
-                raise ValueError(f"Tipo de arquivo não suportado: {file_type}")
-                
-        except Exception as e:
-            st.error(f"Erro ao processar o arquivo: {str(e)}")
-            raise
-
-    def create_vector_store(documents, vector_db_path):
-        """Create and save vector store"""
-        try:
-            os.makedirs(vector_db_path, exist_ok=True)
-            
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800,
-                chunk_overlap=200,
-            )
-            
-            st.write("Dividindo documentos...")
-            chunks = text_splitter.split_documents(documents)
-            st.write(f"Total de chunks: {len(chunks)}")
-            
-            st.write("Criando vector store...")
-            vector_store = FAISS.from_documents(chunks, embedding_model)
-            
-            st.write("Salvando vector store...")
-            vector_store.save_local(vector_db_path)
-            
-            # Verificação final
-            if not os.path.exists(os.path.join(vector_db_path, "index.faiss")):
-                raise FileNotFoundError("Falha ao salvar vector store")
-                
-            return vector_store
-            
-        except Exception as e:
-            st.error(f"Erro ao criar vector store: {str(e)}")
-            if os.path.exists(vector_db_path):
-                shutil.rmtree(vector_db_path)
-            return None
-
-    def load_vector_store(vector_db_path):
-        """Load vector store from disk"""
-        try:
-            return FAISS.load_local(
-                vector_db_path, 
-                embedding_model,
-                allow_dangerous_deserialization=True
-            )
-        except Exception as e:
-            st.error(f"Erro ao carregar vector store: {str(e)}")
-            return None
-
     def create_new_knowledge_base():
         """Interface para criar nova base de conhecimento"""
         folder_path = col1.text_input(
@@ -377,28 +382,35 @@ def main():
         # Configuração principal da aplicação
         st.title("RAG App com Google Gemini")
 
-        initialize_session_state()
-
-        # Configuração da API
-        load_dotenv()
-        google_api_key = os.getenv("google_api_key")
-
-        genai.configure(api_key=google_api_key)
-
-        generation_config = {
-            "temperature": 0.7,
-            "top_p": 0.95,
-            "top_k": 64,
-            "max_output_tokens": 65536,
-        }
-
-        # Modelos globais
-        global embedding_model, model
-        embedding_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-thinking-exp-01-21",
-            generation_config=generation_config,
-        )
+        try:
+            # Configuração da API
+            load_dotenv()
+            google_api_key = os.getenv("google_api_key")
+            
+            if not google_api_key:
+                st.error("Chave de API Google não encontrada. Verifique seu arquivo .env")
+                return
+                
+            genai.configure(api_key=google_api_key)
+    
+            generation_config = {
+                "temperature": 0.7,
+                "top_p": 0.95,
+                "top_k": 64,
+                "max_output_tokens": 65536,
+            }
+    
+            # Modelos globais
+            global embedding_model, model
+            embedding_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+            model = genai.GenerativeModel(
+                model_name="gemini-2.0-flash-thinking-exp-01-21",
+                generation_config=generation_config,
+            )
+        except Exception as e:
+            st.error(f"Erro ao configurar API: {str(e)}")
+            logger.error(f"Erro de configuração da API: {str(e)}")
+            return
 
         # Interface principal
         mode = col1.radio(
