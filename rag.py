@@ -317,39 +317,7 @@ def delete_knowledge_base():
 def handle_query():
 
     initialize_session_state() 
-    """Interface para consultas"""
-    if st.session_state.get('vector_store'):
-        query = st.text_input("Sua pergunta:")
-        
-        if query:
-            try:
-                results = st.session_state['vector_store'].similarity_search(query, k=5)
-                
-                context = "\n".join([doc.page_content for doc in results])
-                
-                prompt = f"""
-                Contexto: {context}
-                
-                Pergunta: {query}
-                
-                Por favor, responda usando apenas as informações do contexto.
-                Se a informação não estiver disponível, diga que não pode responder.
-                
-                Resposta:
-                """
-                
-                response = model.generate_content(prompt)
-                
-                st.subheader("Resposta:")
-                st.write(response.text)
-                
-                with st.expander("Ver contexto"):
-                    st.write(context)
-                    
-            except Exception as e:
-                st.error(f"Erro na consulta: {str(e)}")
-    else:
-        st.info("Selecione ou crie uma base primeiro")
+   
 
 with col2:
     # Configuração principal da aplicação
@@ -384,12 +352,12 @@ with col2:
         ["Criar base", "Usar base existente", "Deletar base"]
     )
     
-    #if mode == "Criar base":
-     #   create_new_knowledge_base()
-    #elif mode == "Usar base existente":
-      #  use_existing_bases()
-    #else:
-     #   delete_knowledge_base()
+    if mode == "Criar base":
+        create_new_knowledge_base()
+    elif mode == "Usar base existente":
+        use_existing_bases()
+    else:
+        delete_knowledge_base()
  
 def main():
 
