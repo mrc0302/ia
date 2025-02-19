@@ -31,7 +31,15 @@ def main():
 
     initialize_session_state()
     
-   
+    def get_available_bases(base_dir):
+        """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
+        bases = {}
+        if os.path.exists(base_dir):
+            for base_name in os.listdir(base_dir):
+                base_path = os.path.join(base_dir, base_name)
+                if os.path.isdir(base_path) and os.path.exists(os.path.join(base_path, "index.faiss")):
+                    bases[base_name] = base_path
+        return bases
 
     def process_text_file(file_content: str) -> List[Document]:
         """Process plain text content"""
@@ -60,17 +68,7 @@ def main():
             return [Document(page_content=text)]
         except Exception as e:
             raise ValueError(f"Erro ao processar arquivo PDF: {str(e)}")
-
-    def process_html(file_content: str) -> List[Document]:
-        """Process HTML file content"""
-        try:
-            soup = BeautifulSoup(file_content, 'html.parser')
-            text = soup.get_text(separator="\n", strip=True)
-            if not text:
-                raise ValueError("O arquivo HTML está vazio ou não contém texto")
-            return [Document(page_content=text)]
-        except Exception as e:
-            raise ValueError(f"Erro ao processar arquivo HTML: {str(e)}")
+ 
 
     def process_csv(file_content: bytes) -> List[Document]:
         """Process CSV file content"""
@@ -391,7 +389,8 @@ def main():
         else:
             delete_knowledge_base()
 
-        handle_query()
+       
 
 if __name__ == "__main__":
     main()
+    handle_query()
