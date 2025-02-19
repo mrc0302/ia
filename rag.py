@@ -20,9 +20,7 @@ import logging
 
 def main():
 
-    if 'initialized' not in st.session_state:
-        initialize_session_state()
-        st.session_state['initialized'] = True
+    
     
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
@@ -38,6 +36,10 @@ def main():
             st.session_state['confirm_delete'] = False
         if 'base_dir' not in st.session_state:
            st.session_state['base_dir'] = ""
+        if 'initialized' not in st.session_state:
+            initialize_session_state()
+            st.session_state['initialized'] = True
+        
     initialize_session_state()
     def get_available_bases(base_dir):
         """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
