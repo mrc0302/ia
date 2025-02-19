@@ -1,3 +1,7 @@
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+
 # Core Dependencies
 langchain>=0.1.0
 langchain-community>=0.0.10
