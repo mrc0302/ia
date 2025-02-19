@@ -29,7 +29,7 @@ def initialize_session_state():
     if 'base_dir' not in st.session_state:
         st.session_state['base_dir'] = ""
 
-initialize_session_state()
+
 
 def get_available_bases(base_dir):
     """Lista todas as bases de conhecimento disponíveis no diretório escolhido"""
@@ -315,6 +315,8 @@ def delete_knowledge_base():
             st.error(f"Erro ao deletar base: {str(e)}")
 
 def handle_query():
+
+    initialize_session_state() 
     """Interface para consultas"""
     if st.session_state.get('vector_store'):
         query = st.text_input("Sua pergunta:")
@@ -381,7 +383,7 @@ with col2:
         "Modo:",
         ["Criar base", "Usar base existente", "Deletar base"]
     )
-
+    
     #if mode == "Criar base":
      #   create_new_knowledge_base()
     #elif mode == "Usar base existente":
