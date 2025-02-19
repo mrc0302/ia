@@ -322,7 +322,7 @@ def delete_knowledge_base():
         except Exception as e:
             st.error(f"Erro ao deletar base: {str(e)}")
 
-def main():():
+def main():
     """Interface para consultas"""
     if st.session_state.get('vector_store'):
         query = st.text_input("Sua pergunta:")
