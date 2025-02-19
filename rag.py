@@ -231,31 +231,7 @@ def create_new_knowledge_base():
             except Exception as e:
                 st.error(f"Erro ao criar base: {str(e)}")
 
-def use_existing_bases():
-    """Interface para usar bases existentes"""
-    folder_path = col1.text_input(
-        "Escolha a pasta da base de conhecimento:",
-        help="Caminho completo para a pasta onde estão suas bases"
-    )
-    
-    if not folder_path:
-        col1.info("Por favor, informe o caminho da pasta que contém suas bases")
-        return
-        
-    if not os.path.exists(folder_path):
-        col1.error(f"A pasta {folder_path} não existe")
-        return
-        
-    bases = get_available_bases(folder_path)
-    
-    if not bases:
-        col1.warning(f"Nenhuma base encontrada em {folder_path}")
-        return
-        
-    selected_bases = col1.multiselect(
-        "Selecione as bases:",
-        options=list(bases.keys())
-    )
+
     
     if selected_bases and col1.button("Carregar Bases"):
         try:
