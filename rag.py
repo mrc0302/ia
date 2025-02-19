@@ -27,8 +27,7 @@ def main():
         )
 
     vector_store= FAISS.load_local(
-                #"faiss_legal_store_gemini",
-                "C:/Users/mcres/Documents/base de conhecimento/cdc",
+                "faiss_legal_store_gemini",                
                 embeddings,
                 allow_dangerous_deserialization=True
             )
