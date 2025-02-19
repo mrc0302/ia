@@ -15,10 +15,20 @@ import io
 import shutil
 from uuid import uuid4
 from time import sleep
+import logging
 
 
 def main():
 
+    if 'initialized' not in st.session_state:
+        initialize_session_state()
+        st.session_state['initialized'] = True
+    
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    # Use em pontos críticos:
+    logger.info("Iniciando carregamento da base")
     col1, col2 = st.columns([1, 2])
 
     def initialize_session_state():
