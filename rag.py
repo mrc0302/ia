@@ -322,7 +322,7 @@ def delete_knowledge_base():
         except Exception as e:
             st.error(f"Erro ao deletar base: {str(e)}")
 
-def handle_query():
+def main():():
     """Interface para consultas"""
     if st.session_state.get('vector_store'):
         query = st.text_input("Sua pergunta:")
@@ -356,7 +356,7 @@ def handle_query():
                 st.error(f"Erro na consulta: {str(e)}")
     else:
         st.info("Selecione ou crie uma base primeiro")
-def main():
+    
     with col2:
         # Configuração principal da aplicação
         st.title("RAG App com Google Gemini")
