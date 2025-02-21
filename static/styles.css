@@ -1,4 +1,6 @@
-
+.ql-editor p{
+    font-weight: bold!important;
+} 
 .st-key-search button {  
 
     background-color: rgb(211, 31, 31) !important;
