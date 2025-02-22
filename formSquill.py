@@ -477,7 +477,7 @@ def main():
                     st.session_state.form_content = blank_lines
 
                 content = st_quill(
-                    value=f"""<span class=ql-size-large>{st.session_state.form_content}</span>""",
+                    value=f"""<h1>{st.session_state.form_content}</h1>""",
                     html=True,
                     toolbar=toolbar,
                     history=True,
