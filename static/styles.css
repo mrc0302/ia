@@ -44,7 +44,7 @@
     font-weight: bold !important;
 }
 
-.stDialog .st-bv .st-ez .st-f0 .st-f1 .st-bu .st-f2 .st-er .st-f3 .st-f4{ /*título da mensagem*/
+.stDialog .st-bv{ /*título da mensagem*/
 
     background-color: rgb(27, 2, 73) !important;
     color: white !important;
