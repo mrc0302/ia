@@ -205,47 +205,44 @@ def main():
 
     load_css("static/styles.css")
 
-    @st.dialog("Aviso") 
+    @st.dialog("Aviso", width="small") 
     def show_confirmation_export():      
-        with st.container():
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.write(f"documento exportado na pasta download!") 
-
-            action_display = {
-                "ok": "ok"
-            }.get(st.session_state.action_type, "")
-                
             
-            col1 = st.columns(1)[0]
-            
-            with col1:
-                if st.button("Ok", key="confirm_yes"):
-                    if st.session_state.action_type == "ok":
-                        st.session_state.dialog_open = False
-                    st.rerun()
+        st.markdown(f"<br><div style='text-align: center; font-size: 20px;'>Documento exportado na pasta Downloads!</div><br>", unsafe_allow_html=True)
+        action_display = {
+            "ok": "ok"
+        }.get(st.session_state.action_type, "")
+                   
+        col1 = st.columns(1)[0]
+        
+        # with col1:
+        #     if st.button("Ok", key="confirm_yes"):
+        #         if st.session_state.action_type == "ok":
+        #             st.session_state.dialog_open = False
+        #         st.rerun()
 
-    @st.dialog("Aviso") 
+    @st.dialog("Aviso", width="small") 
     def show_error_dialog(error):      
         with st.container():
-            st.markdown("<br >", unsafe_allow_html=True)
-            st.write(f"{error}")   
+          
+            st.markdown(f"<br><div style='text-align: center; font-size: 20px;'>{error}</div><br>", unsafe_allow_html=True)
             
             action_display = {
                 "ok": "ok"
             }.get(st.session_state.action_type, "")
                 
             
-            col1 = st.columns(1)[0]
+            # col1 = st.columns(1)[0]
             
-            with col1:
-                if st.button("Ok", key="confirm_yes"):
-                    if st.session_state.action_type == "ok":
-                        st.session_state.dialog_open = False
-                    st.rerun()
+            # with col1:
+            #     if st.button("Ok", key="confirm_yes"):
+            #         if st.session_state.action_type == "ok":
+            #             st.session_state.dialog_open = False
+            #         st.rerun()
 
-    @st.dialog("Aviso") 
+    @st.dialog("Aviso",width="small") 
     def show_confirmation_dialog():
-        with st.container():
+        #with st.container(key="dialog"):
             action_display = {
                 "salvar": "salvar",
                 "excluir": "excluir",
@@ -253,11 +250,12 @@ def main():
             }.get(st.session_state.action_type, "")
             
             
-            st.write(f"Deseja realmente {action_display} este documento?")
+            st.markdown(f"<div style='text-align: center; font-size: 20px;'>Deseja realmente {action_display} este documento?</div>", unsafe_allow_html=True)
             
-            col1, col2 = st.columns([1, 1])
+            col1_button, col2_button = st.columns([1, 1])
             
-            with col1:
+            with col1_button:
+                
                 if st.button("Sim", key="confirm_yes"):
                     if st.session_state.action_type == "salvar":
                         execute_save()
@@ -269,7 +267,8 @@ def main():
                     st.session_state.temp_data = {}
                     st.rerun()
             
-            with col2:
+            with col2_button:
+
                 if st.button("Não", key="confirm_no"):
                     st.session_state.show_dialog = False
                     st.session_state.action_type = None
@@ -369,7 +368,8 @@ def main():
 
     init_session_state()
     app = Database()
-
+    
+    # esconde o header da página
     st.markdown("""
         <style>
             .main {
@@ -392,6 +392,13 @@ def main():
             
         </style>
     """, unsafe_allow_html=True)
+
+
+    if st.session_state.show_dialog:
+        show_confirmation_dialog()
+            
+    if st.session_state.dialog_open:
+        show_confirmation_export()
 
     # Layout principal
     col1, col2 = st.columns([1.5,5])
@@ -438,18 +445,12 @@ def main():
 
     with col2:
                 
-        with st.form("document_form"):
+        with st.form(key="form"):
 
             st.markdown("<h4 style='text-align: center; margin-top: -2rem; margin-bottom:0px'>📝Modelos de decisões judiciais</h4>", unsafe_allow_html=True)
             assunto = st.text_input("Assunto:", value=st.session_state.form_assunto)
             classe = st.text_input("Classe:", value=st.session_state.form_classe)
-            
-            if st.session_state.show_dialog:
-                show_confirmation_dialog()
-            
-            if st.session_state.dialog_open:
-                show_confirmation_export()
-
+                       
             
 
             with st.container(height=600, border=True):
@@ -490,6 +491,7 @@ def main():
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
+
                 if st.form_submit_button(" 💾 Salvar"):
                     if not assunto:
                         show_error_dialog("O campo Assunto é obrigatório")
@@ -515,7 +517,7 @@ def main():
                     st.rerun()
 
             with col3:
-                if st.form_submit_button("🗑️ Excluir"):
+                if st.form_submit_button("🗑️ Excluir" ):
                     if st.session_state.form_assunto:
                         st.session_state.show_dialog = True
                         st.session_state.action_type = "excluir"
