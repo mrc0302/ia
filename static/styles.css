@@ -31,7 +31,7 @@
 
 }
 
-.st-key-search button {  
+.st-key-search button{  
 
     background-color: rgb(211, 31, 31) !important;
     color: white !important;
@@ -48,16 +48,7 @@
 
     background-color: rgb(27, 2, 73) !important;
     color: white !important;
-    align-content: center;
-
-    
-}
-
-    background-color: rgb(27, 2, 73) !important;
-    color: white !important;
-    align-content: center;
-
-    
+    align-content: center;    
 }
 
 .stForm button{
