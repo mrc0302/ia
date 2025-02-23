@@ -1,6 +1,36 @@
-.ql-editor p{
-    font-weight: bold!important;
-} 
+
+.st-key-confirm_yes button{
+
+    background-color: rgb(17, 17, 17) !important;
+    color: white !important;
+    width: 150px !important; 
+    margin: 15%;    
+}
+.st-key-confirm_yes button:hover{
+    
+    box-shadow: 0 0 10px rgb(187, 64, 64);
+    background-color: rgb(139, 11, 11) !important;
+    font-weight: bold !important;
+    width: 150px !important;     
+}
+
+.st-key-confirm_no button{
+
+    background-color: rgb(17, 17, 17) !important;
+    color: white !important;
+    width: 150px !important; 
+    margin: 15%; 
+
+}
+
+.st-key-confirm_no button:hover{
+    box-shadow: 0 0 10px rgb(187, 64, 64);
+    background-color: rgb(139, 11, 11) !important;
+    font-weight: bold !important;
+    width: 150px !important;   
+
+}
+
 .st-key-search button {  
 
     background-color: rgb(211, 31, 31) !important;
@@ -8,57 +38,52 @@
     width: 150px !important;
 }
 
-button[kind="primary"]:hover { /*pesquisa*/
+.stDialog .st-fo{
+
+    align-self: center;
+    font-weight: bold !important;
+}
+
+.stDialog .st-fl { /*título da mensagem*/
+
+    background-color: rgb(27, 2, 73) !important;
+    color: white !important;
+    align-content: center;
+
     
+}
+
+.stForm button{
+
+    background-color: rgb(17, 16, 16) !important;
+    color: white !important;
+    width: 150px !important;
+    margin-top: 10px;
+    margin-left: 20%;    
+}
+
+.stForm button:hover{
     box-shadow: 0 0 10px rgb(187, 64, 64);
-    font-weight: bold!important;
-    width: 150px !important;    
-    
-} 
+    background-color: rgb(139, 11, 11) !important;
+    font-weight: bold !important;
+    width: 150px !important;     
+
+}
 
 .form_submit_button {/*engloba o checkbox também*/
-    /*background-color: black !important;*/
-    color: white !important;
-    width: 150px;
-    /* border-radius: 15px;     */
-    font-weight: bold;    
-    border: none;
-    position: absolute !important; 
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important; 
-    margin-top: 20px;
-}
-
-.stColumn:nth-of-type(2) button { 
-    background-color: black !important;
-    color: white !important;
-    width: 150px;
-    /* border-radius: 15px;     */
-    font-weight: bold;    
-    border: none;
-    position: absolute !important; 
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important; 
-    margin-top: 20px;
    
-}
-
-button[kind="secondary"] {/*pesquisa resultado*/
-    
-    background-color: #070707;   
     color: white !important;
-    width: 400px!important;    
-    /* padding: 10px 20px; */
-    border-radius: 10px!important;;
-}
+    width: 150px;
+   
+    font-weight: bold;    
+    border: none;
+    position: absolute !important; 
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; 
+    margin-top: 20px;
+    width: 150px !important;
 
-button[kind="secondary"] p {/*pesquisa*/
-    
-    color: white;   
-    font-size: 10px!important; 
-    
 }
 
 .st-emotion-cache-1vxvi18.e1obcldf2 p {
@@ -110,32 +135,32 @@ button[kind="secondary"] p {/*pesquisa*/
     
     /* outros estilos que queira manter fixos no hover */
 }
-  
+/*   
 .stDialog button {   
    
     font-weight: bold !important; 
-   /* position: absolute !important;*/
-
-}
+  
+} */
 
 button[aria-label="Close"] {
-    display: none !important; 
+    /*display: none !important; */
+    color: rgb(226, 225, 230);   
     
-}
+} 
 
-div[aria-label="dialog"] {
+/* div[aria-label="dialog"] {
     height: 140px!important;
     width: 360px!important;
     
-}
-
+} */
+/* 
 .st-fc {
     height: 140px!important;
     width: 360px!important;
     
     background-color: #e91212 !important; 
-}
-
+} */
+/* 
 
 .st-f9 {
 
@@ -143,7 +168,7 @@ div[aria-label="dialog"] {
     width: 360px;  
      
     background-color: #050505 !important; 
-}
+} */
 
 /*   container */ 
 iframe[data-testid="stCustomComponentV1"] {   
