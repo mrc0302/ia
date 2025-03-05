@@ -31,4 +31,4 @@ streamlit-quill>=0.0.1
 pypandoc
 pandas>=1.3.0
 
-psycopg2==2.9.10
+
