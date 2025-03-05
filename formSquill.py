@@ -1,8 +1,8 @@
 import streamlit as st
 
-# # Configuração da página deve ser o primeiro comando Streamlit
+# Configuração da página
 # st.set_page_config(
-#     page_title="Ex-stream-ly Cool App",
+#     page_title="Sistema de Modelos Judiciais",
 #     page_icon="🧊", 
 #     layout="wide",  
 #     initial_sidebar_state="expanded"
@@ -11,7 +11,7 @@ import streamlit as st
 import time
 from streamlit_quill import st_quill
 import re
-from database import Database
+from databasePostgres  import Database
 import html
 from docx import Document
 from docx.shared import Pt, RGBColor
@@ -20,11 +20,14 @@ from bs4 import BeautifulSoup
 import io
 import os
 from docx.enum.text import WD_COLOR_INDEX
+import logging
 
+# Configuração de logging
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('FormSquill')
 
 def main():
-
-
 
     def transform_results_to_items(results):
         # Agrupar por classe
@@ -167,10 +170,35 @@ def main():
             
             return doc
         except Exception as e:
-            print(f"Error creating Word document: {str(e)}")
+            logger.error(f"Error creating Word document: {str(e)}")
             return None
 
+    def generate_rtf_from_html(html_content):
+        """
+        Gera um conteúdo RTF básico a partir do HTML.
+        Esta é uma conversão simples que preserva o texto base.
+        """
+        if not html_content:
+            return ""
+        
+        # Remove tags HTML para obter texto simples
+        soup = BeautifulSoup(html_content, 'html.parser')
+        text = soup.get_text()
+        
+        # Cabeçalho RTF básico
+        rtf_header = r"{\rtf1\ansi\ansicpg1252\deff0\deflang1046"
+        rtf_footer = r"}"
+        
+        # Substitui quebras de linha por \par no RTF
+        text = text.replace('\n', r'\par ')
+        
+        # Monta o RTF completo
+        rtf_content = f"{rtf_header}\n{text}\n{rtf_footer}"
+        
+        return rtf_content
+
     def init_session_state():
+        # Inicialização de todas as variáveis de sessão
         if "form_assunto" not in st.session_state:
             st.session_state.form_assunto = ""
         if "form_classe" not in st.session_state:
@@ -197,13 +225,23 @@ def main():
             st.session_state.search_results = None
         if 'dialog_open' not in st.session_state:
             st.session_state.dialog_open = False
-
+        # Variáveis para mensagens de erro/sucesso
+        if "success_message" not in st.session_state:
+            st.session_state.success_message = None
+        if "error_message" not in st.session_state:
+            st.session_state.error_message = None
 
     def load_css(file_path):
-        with open(file_path) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        try:
+            with open(file_path) as f:
+                st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        except Exception as e:
+            logger.warning(f"Erro ao carregar CSS: {str(e)}")
 
-    load_css("static/styles.css")
+    try:
+        load_css("static/styles.css")
+    except:
+        logger.warning("Arquivo CSS não encontrado. Usando estilos padrão.")
 
     @st.dialog("Aviso", width="small") 
     def show_confirmation_export():      
@@ -275,38 +313,65 @@ def main():
                     st.session_state.temp_data = {}
                     st.session_state.search_text = ""  # Limpa o resultado da busca
                     st.rerun()
-                    
     def execute_save():
-        app = Database()
-        assunto = st.session_state.temp_data.get('assunto')
-        classe = st.session_state.temp_data.get('classe')
-        content =f"{st.session_state.temp_data.get('content')}".rstrip() 
+        """Salva o documento no banco de dados"""
+        try:
+            app = Database()
+            assunto = st.session_state.temp_data.get('assunto')
+            classe = st.session_state.temp_data.get('classe')
+            html_content = f"{st.session_state.temp_data.get('content')}".rstrip() 
+            
+            # Gera o conteúdo RTF a partir do HTML
+            rtf_content = generate_rtf_from_html(html_content)
+            
+            content_to_save = {
+                'html': html_content,
+                'rtf': rtf_content
+            }
+            
+            logger.info(f"Salvando documento: assunto={assunto}, classe={classe}")
+            success, message = app.save_or_update_document(assunto, classe, content_to_save)
+            
+            if success:
+                logger.info("Documento salvo com sucesso")
+                set_form_data(assunto, classe, html_content)
+                st.session_state.success_message = "Documento salvo com sucesso!"
+            else:
+                logger.error(f"Erro ao salvar documento: {message}")
+                st.session_state.error_message = message
         
-        content_to_save = {
-            'text': content,
-            'html': content
-        }
-        
-        success, message = app.save_or_update_document(assunto, classe, content_to_save)
-        if success:
-            set_form_data(assunto, classe, content)
-        else:
-            show_error_dialog(message)
+        except Exception as e:
+            logger.error(f"Exceção ao salvar documento: {str(e)}")
+            st.session_state.error_message = f"Erro ao salvar: {str(e)}"
 
     def execute_delete():
-        app = Database()
-        assunto = st.session_state.form_assunto
+        """Exclui o documento do banco de dados"""
+        try:
+            app = Database()
+            assunto = st.session_state.form_assunto
 
-        if assunto:
-            success, message = app.delete_document(assunto)
-            if success:
-                set_form_data()
+            if assunto:
+                logger.info(f"Excluindo documento: assunto={assunto}")
+                success, message = app.delete_document(assunto)
+                
+                if success:
+                    logger.info("Documento excluído com sucesso")
+                    set_form_data()
+                    st.session_state.success_message = "Documento excluído com sucesso!"
+                else:
+                    logger.error(f"Erro ao excluir documento: {message}")
+                    st.session_state.error_message = message
             else:
-                show_error_dialog(message)
-        else:
-            show_error_dialog("show_error_dialog")
+                logger.warning("Tentativa de excluir documento sem assunto")
+                st.session_state.error_message = "Selecione um documento para excluir"
+        
+        except Exception as e:
+            logger.error(f"Exceção ao excluir documento: {str(e)}")
+            st.session_state.error_message = f"Erro ao excluir: {str(e)}"
 
     def execute_clear():
+        """Limpa o formulário e campos relacionados"""
+        logger.info("Limpando formulário")
         # Limpa os campos do formulário
         set_form_data()
         
@@ -315,13 +380,17 @@ def main():
         st.session_state.search_mode = "Assunto"  # Reseta para o valor padrão
         st.session_state.search_results = None
         
+        st.session_state.success_message = "Formulário limpo com sucesso!"
+
     def set_form_data(assunto="", classe="", content=""):
+        """Define os dados do formulário na sessão"""
         st.session_state.form_assunto = assunto
         st.session_state.form_classe = classe
         blank_lines = "<BR>".join(["<BR>"] * 25)    
         st.session_state.form_content = content + blank_lines
 
     def highlight_search_terms(html_content, search_text):
+        """Destaca termos de pesquisa no conteúdo HTML"""
         if not st.session_state.highlight_enabled or not search_text or not html_content:
             return html_content
         
@@ -338,38 +407,44 @@ def main():
                     highlighted_content
                 )
             except Exception as e:
-                print(f"Erro ao destacar termo '{term}': {str(e)}")
+                logger.warning(f"Erro ao destacar termo '{term}': {str(e)}")
         
         return highlighted_content
 
     def execute_search():
+        """Executa a pesquisa no banco de dados"""
         app = Database()
         if st.session_state.search_text:
             try:
+                logger.info(f"Pesquisando: modo={st.session_state.search_mode}, texto={st.session_state.search_text}")
                 results, error_message = app.search_documents(
                     st.session_state.search_text, 
                     st.session_state.search_mode
                 )
                 
                 if error_message:
+                    logger.error(f"Erro na busca: {error_message}")
                     st.error(f"Erro na busca: {error_message}")
                     st.session_state.search_results = None
                 elif not results:
+                    logger.info("Nenhum documento encontrado")
                     st.warning("Nenhum documento encontrado!")
                     st.session_state.search_results = None
                 else:
+                    logger.info(f"Encontrados {len(results)} resultados")
                     st.success(f"Encontrados {len(results)} resultados")
                     st.session_state.search_results = results
                 
             except Exception as e:
+                logger.error(f"Exceção na busca: {str(e)}")
                 st.error(f"Erro na busca: {str(e)}")
                 st.session_state.search_results = None
 
-
+    # Inicializa o estado da sessão
     init_session_state()
     app = Database()
     
-    # esconde o header da página
+    # Esconde o header da página
     st.markdown("""
         <style>
             .main {
@@ -389,27 +464,34 @@ def main():
             header {
                 visibility: hidden;
             }                  
-            
         </style>
     """, unsafe_allow_html=True)
 
+    # # Exibir mensagens de sucesso ou erro
+    # if st.session_state.success_message:
+    #     st.success(st.session_state.success_message)
+    #     st.session_state.success_message = None
+        
+    # if st.session_state.error_message:
+    #     st.error(st.session_state.error_message)
+    #     st.session_state.error_message = None
 
+    # Mostrar diálogo de confirmação se necessário
     if st.session_state.show_dialog:
         show_confirmation_dialog()
             
     if st.session_state.dialog_open:
-        show_confirmation_export()
+        st.success("Documento exportado na pasta Downloads!")
+        st.session_state.dialog_open = False
 
     # Layout principal
-    col1, col2 = st.columns([1.5,5])
+    col1, col2 = st.columns([1.5, 5])
 
     with col1:
-    #with st.sidebar:
-    
         st.markdown("<h4 style='text-align: left'> Pesquisa de Modelos</h4>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         
-        st.session_state.highlight_enabled = st.checkbox("Destacar termos encontrados", value=False)
+        st.session_state.highlight_enabled = st.checkbox("Destacar termos encontrados", value=st.session_state.highlight_enabled)
         
         # Campo de pesquisa
         search_text = st.text_input("Parâmetro:", key="search_text")
@@ -418,12 +500,13 @@ def main():
                             key="search_mode")
         
         # Botão de pesquisa
-        if st.button("🔍 Pesquisar", type="primary", key="search" ):
+        if st.button("🔍 Pesquisar", type="primary", key="search"):
             execute_search()
 
+        # Container para resultados da pesquisa
         container = st.container(height=500, key="container")    
     
-        with container: # Exibição dos resultados
+        with container:
             if st.session_state.search_results is not None:
                 classes = {}
                 for assunto, classe, preview in st.session_state.search_results:
@@ -442,17 +525,12 @@ def main():
                                 else:
                                     st.error(doc_message)
 
-
     with col2:
-                
         with st.form(key="form"):
-
             st.markdown("<h4 style='text-align: center; margin-top: -2rem; margin-bottom:0px'>📝Modelos de decisões judiciais</h4>", unsafe_allow_html=True)
             assunto = st.text_input("Assunto:", value=st.session_state.form_assunto)
             classe = st.text_input("Classe:", value=st.session_state.form_classe)
                        
-            
-
             with st.container(height=600, border=True):
                 toolbar = {
                     'container': [
@@ -471,7 +549,7 @@ def main():
                         ['link', 'image', 'video'],
                         ['formula']
                     ]
-                    }
+                }
                 
                 if st.session_state.form_content == "":
                     blank_lines = "<BR>".join(["<BR>"] * 25)
@@ -487,18 +565,15 @@ def main():
                     key=None
                 )
                     
-
+            # Botões de ação
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-
                 if st.form_submit_button(" 💾 Salvar"):
                     if not assunto:
-                        show_error_dialog("O campo Assunto é obrigatório")
-                        
+                        st.session_state.error_message = "O campo Assunto é obrigatório"
                     elif not classe:
-                        show_error_dialog("O campo Classe é obrigatório")
-                        
+                        st.session_state.error_message = "O campo Classe é obrigatório"
                     else:
                         st.session_state.show_dialog = True
                         st.session_state.action_type = "salvar"
@@ -513,28 +588,36 @@ def main():
                 if st.form_submit_button("✨ Novo"):
                     st.session_state.show_dialog = True
                     st.session_state.action_type = "limpar"             
-
                     st.rerun()
 
             with col3:
-                if st.form_submit_button("🗑️ Excluir" ):
+                if st.form_submit_button("🗑️ Excluir"):
                     if st.session_state.form_assunto:
                         st.session_state.show_dialog = True
                         st.session_state.action_type = "excluir"
                         st.rerun()
+                    else:
+                        st.session_state.error_message = "Selecione um documento para excluir"
+                        st.rerun()
 
             with col4:
-                if st.form_submit_button("📝 exportar word"):
+                if st.form_submit_button("📝 Exportar Word"):
                     if content:
-                        doc = html_to_word(content)
-                        if doc:
-                            docx_file = io.BytesIO()
-                            doc.save(docx_file)
-                            docx_file.seek(0)                            
-                            filename = f"{assunto if assunto else 'documento'}.docx"
-                            download_path = os.path.join(os.path.expanduser('~'), 'Downloads')
-                            doc.save(os.path.join(download_path, filename))
-                            show_confirmation_export()                           
-   
+                        try:
+                            doc = html_to_word(content)
+                            if doc:
+                                docx_file = io.BytesIO()
+                                doc.save(docx_file)
+                                docx_file.seek(0)                            
+                                filename = f"{assunto if assunto else 'documento'}.docx"
+                                download_path = os.path.join(os.path.expanduser('~'), 'Downloads')
+                                doc.save(os.path.join(download_path, filename))
+                                st.session_state.dialog_open = True
+                                st.rerun()
+                        except Exception as e:
+                            logger.error(f"Erro ao exportar para Word: {str(e)}")
+                            st.session_state.error_message = f"Erro ao exportar: {str(e)}"
+                            st.rerun()
+
 if __name__ == "__main__":
     main()
