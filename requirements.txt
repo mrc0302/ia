@@ -10,7 +10,7 @@ google-generativeai>=0.3.0
 python-dotenv>=1.0.0
 
 # Document Processing
-PyPDF2>=3.0.0
+PyPDF2>=3.0.1
 python-docx>=0.8.11
 
 # Web Scraping & Search
@@ -26,21 +26,9 @@ faiss-cpu>=1.7.4
 streamlit>=1.31.0
 streamlit-option-menu>=0.3.12
 streamlit-quill>=0.0.1
-# Utilities
-python-dotenv>=1.0.0
-pypandoc
 
-streamlit>=1.10.0
-google-generativeai>=0.1.0
-langchain>=0.0.148
-langchain-google-genai>=0.0.2
-langchain-community>=0.0.1
-python-dotenv>=0.20.0
+# Utilities
+pypandoc
 pandas>=1.3.0
-python-docx>=0.8.11
-PyPDF2>=3.0.1
-beautifulsoup4>=4.11.1
-faiss-cpu>=1.7.3
 
 psycopg2
-beautifulsoup4
