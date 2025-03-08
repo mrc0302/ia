@@ -21,7 +21,7 @@ class Database:
                     cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, connection_string="Host=fearlessly-exuberant-raven.data-1.use1.tembo.io;Port=5432;Database=postgres;Username=postgres;Password=P4lYzpUvJWl5x9rc;SslMode=Require;Trust Server Certificate=true"):
+    def __init__(self, connection_string="Host=dbpostgres.c69sswyckdq3.us-east-1.rds.amazonaws.com;Port=5432;Database=postgres;Username=postgres;Password=lwm4r*s4*"):
         if not hasattr(self, 'initialized'):
             print("Inicializando classe Database PostgreSQL")
             # Parsear a string de conexão no formato ADO.NET
