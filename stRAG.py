@@ -13,6 +13,30 @@ import shutil
 
 
 def main():
+    # Configurar estilo CSS para ajustar o tamanho da fonte em toda a aplicação
+    st.markdown("""
+    <style>
+        html, body, [class*="st-"], .stMarkdown, .css-18e3th9, .css-1d391kg, .st-ae, .st-af, .st-ag, .st-ah, .st-ai, .st-aj, .st-ak, .st-al, .st-am {
+            font-size: 12px !important;
+        }
+        h1, h2, h3 {
+            font-size: 1.5rem !important;
+        }
+        h4, h5, h6 {
+            font-size: 1.2rem !important;
+        }
+        .stAlert {
+            font-size: 12px !important;
+        }
+        .stButton button {
+            font-size: 12px !important;
+        }
+        code {
+            font-size: 11px !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
     st.title("RAG Legal App com Gemma-3-27b-it")
     
     # Inicializar estado da sessão
@@ -417,7 +441,22 @@ def handle_legal_query(model):
     if st.session_state.get('vector_store'):
         st.write("Base legal carregada e pronta para consultas")
         
-        query = st.text_area("Digite sua consulta jurídica:")
+        # CSS para ajustar a fonte do JSON
+        st.markdown("""
+        <style>
+            .json-formatter-row {
+                font-size: 12px !important;
+            }
+            pre {
+                font-size: 12px !important;
+            }
+            .st-ew {
+                font-size: 12px !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        query = st.text_area("Digite sua consulta jurídica:", height=100)
         
         if query and st.button("Consultar"):
             try:
