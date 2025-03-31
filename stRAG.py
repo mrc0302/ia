@@ -353,12 +353,13 @@ def handle_legal_query(model):
                 
                 with st.expander("Ver contexto legal utilizado"):
                     st.markdown(context)
-                    
-                    # Mostrar metadados dos documentos utilizados
-                    st.subheader("Metadados dos documentos consultados:")
+                
+                # Mostrar metadados dos documentos utilizados em um expander separado
+                with st.expander("Metadados dos documentos consultados"):
                     for i, doc in enumerate(results):
-                        with st.expander(f"Documento {i+1}"):
-                            st.json(doc.metadata)
+                        st.subheader(f"Documento {i+1}")
+                        st.json(doc.metadata)
+                        st.divider()
             
             except Exception as e:
                 st.error(f"Erro na consulta jurídica: {str(e)}")
