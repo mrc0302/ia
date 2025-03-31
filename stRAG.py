@@ -19,7 +19,26 @@ def main():
     if 'vector_store' not in st.session_state:
         st.session_state['vector_store'] = None
     if 'base_dir' not in st.session_state:
-        st.session_state['base_dir'] = ""
+        # Tentar definir o diretório base para o diretório atual
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            st.session_state['base_dir'] = current_dir
+        except:
+            st.session_state['base_dir'] = "."
+            
+    # Exibir informações de debug em um expander
+    with st.expander("Informações de Debug"):
+        st.write(f"Diretório atual: {os.getcwd()}")
+        st.write(f"Diretório base da sessão: {st.session_state['base_dir']}")
+        st.write(f"Diretórios disponíveis: {os.listdir('.')}")
+        
+        # Verificar se as pastas de armazenamento existem
+        for folder in ["faiss_legal_store_gemini", "faiss_legal_store_openai"]:
+            if os.path.exists(folder):
+                st.write(f"✅ Pasta {folder} existe")
+                st.write(f"   Conteúdo: {os.listdir(folder)}")
+            else:
+                st.write(f"❌ Pasta {folder} não existe")
     
     # Configuração da API
     load_dotenv()
@@ -427,14 +446,47 @@ def handle_legal_query(model):
                     
                     response = model.generate_content(prompt)
                 
+                # Formatar resposta jurídica, incluindo metadados das fontes consultadas
+                resposta_formatada = response.text
+                
+                # Adicionar seção de fontes consultadas à resposta
+                fontes_html = "\n\n### Fontes Consultadas\n"
+                for i, doc in enumerate(results):
+                    # Extrair informações relevantes dos metadados
+                    metadata = doc.metadata
+                    fonte_info = ""
+                    
+                    # Verificar se existem campos específicos nos metadados
+                    if 'id' in metadata:
+                        fonte_info += f"**ID**: {metadata['id']} "
+                    if 'tipo_documento' in metadata:
+                        fonte_info += f"**Tipo**: {metadata['tipo_documento']} "
+                    if 'data' in metadata:
+                        fonte_info += f"**Data**: {metadata['data']} "
+                    if 'jurisdicao' in metadata:
+                        fonte_info += f"**Jurisdição**: {metadata['jurisdicao']} "
+                        
+                    # Se não tiver metadados específicos, mostrar todos disponíveis
+                    if not fonte_info:
+                        # Listar todos os metadados disponíveis, exceto texto
+                        campos = [f"**{k}**: {v}" for k, v in metadata.items() 
+                                 if k != 'texto' and k != 'texto_legal']
+                        fonte_info = " | ".join(campos) if campos else "Sem metadados detalhados"
+                    
+                    fontes_html += f"- {fonte_info}\n"
+                
+                # Adicionar as fontes à resposta
+                resposta_completa = resposta_formatada + fontes_html
+                
+                # Exibir a resposta com as fontes
                 st.subheader("Resposta Jurídica:")
-                st.markdown(response.text)
+                st.markdown(resposta_completa)
                 
                 with st.expander("Ver contexto legal utilizado"):
                     st.markdown(context)
                 
-                # Mostrar metadados dos documentos utilizados em um expander separado
-                with st.expander("Metadados dos documentos consultados"):
+                # Mostrar metadados completos dos documentos utilizados em um expander separado
+                with st.expander("Detalhes completos dos documentos consultados"):
                     for i, doc in enumerate(results):
                         st.subheader(f"Documento {i+1}")
                         st.json(doc.metadata)
