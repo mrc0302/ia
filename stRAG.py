@@ -16,23 +16,32 @@ def main():
     # Configurar estilo CSS para ajustar o tamanho da fonte em toda a aplicação
     st.markdown("""
     <style>
-        html, body, [class*="st-"], .stMarkdown, .css-18e3th9, .css-1d391kg, .st-ae, .st-af, .st-ag, .st-ah, .st-ai, .st-aj, .st-ak, .st-al, .st-am {
-            font-size: 12px !important;
+        html, body, [class*="st-"], .stMarkdown, .css-18e3th9, .css-1d391kg, p, div, span {
+            font-size: 16px !important;
         }
-        h1, h2, h3 {
-            font-size: 1.5rem !important;
+        h1 {
+            font-size: 24px !important;
+        }
+        h2, h3 {
+            font-size: 20px !important;
         }
         h4, h5, h6 {
-            font-size: 1.2rem !important;
+            font-size: 18px !important;
         }
-        .stAlert {
-            font-size: 12px !important;
+        .stAlert p {
+            font-size: 16px !important;
         }
         .stButton button {
-            font-size: 12px !important;
+            font-size: 16px !important;
         }
-        code {
-            font-size: 11px !important;
+        code, pre {
+            font-size: 15px !important;
+        }
+        label, .stTextInput, .stTextArea, textarea, input {
+            font-size: 16px !important;
+        }
+        .streamlit-expanderHeader {
+            font-size: 16px !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -414,10 +423,15 @@ def use_existing_legal_base(embedding_model):
     
     selected_base = st.selectbox(
         "Selecione a base legal:",
-        options=list(bases.keys())
+        options=list(bases.keys()),
+        key="legal_base_select"
     )
     
-    if selected_base and st.button("Carregar Base Legal"):
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        carregar_btn = st.button("Carregar Base Legal", use_container_width=True)
+    
+    if selected_base and carregar_btn:
         try:
             base_path = bases[selected_base]
             st.info(f"Carregando base de: {base_path}")
@@ -444,21 +458,35 @@ def handle_legal_query(model):
         # CSS para ajustar a fonte do JSON
         st.markdown("""
         <style>
-            .json-formatter-row {
-                font-size: 12px !important;
+            .json-formatter-row, .json-formatter {
+                font-size: 16px !important;
             }
             pre {
-                font-size: 12px !important;
+                font-size: 16px !important;
             }
             .st-ew {
-                font-size: 12px !important;
+                font-size: 16px !important;
+            }
+            .streamlit-expanderContent {
+                font-size: 16px !important;
+            }
+            .element-container div {
+                font-size: 16px !important;
+            }
+            /* Aumentar o tamanho específico dos resultados JSON */
+            .react-json-view {
+                font-size: 16px !important;
             }
         </style>
         """, unsafe_allow_html=True)
         
-        query = st.text_area("Digite sua consulta jurídica:", height=100)
+        query = st.text_area("Digite sua consulta jurídica:", height=120, max_chars=1000)
         
-        if query and st.button("Consultar"):
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            consultar_btn = st.button("Consultar", use_container_width=True)
+        
+        if query and consultar_btn:
             try:
                 with st.spinner("Buscando informações legais relevantes..."):
                     # Aumentar número de resultados para melhor contexto legal
@@ -487,11 +515,11 @@ def handle_legal_query(model):
                 
                 # Exibir a resposta sem as fontes incorporadas
                 st.subheader("Resposta Jurídica:")
-                st.markdown(response.text)
+                st.markdown(f'<div style="font-size:16px;">{response.text}</div>', unsafe_allow_html=True)
                 
                 # Expander para o contexto legal
                 with st.expander("Ver contexto legal utilizado"):
-                    st.markdown(context)
+                    st.markdown(f'<div style="font-size:16px;">{context}</div>', unsafe_allow_html=True)
                 
                 # Expander separado para metadados no formato JSON
                 with st.expander("Metadados dos documentos consultados"):
