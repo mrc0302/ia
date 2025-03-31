@@ -178,7 +178,28 @@ def create_legal_vector_store(documents, vector_db_path, embedding_model):
 def load_legal_vector_store(vector_db_path, embedding_model):
     """Carrega uma base de conhecimento vetorial legal existente"""
     try:
+        # Verificar se o caminho existe e contém os arquivos necessários
+        if not os.path.exists(vector_db_path):
+            st.error(f"O caminho {vector_db_path} não existe")
+            return None
+            
+        faiss_path = os.path.join(vector_db_path, "index.faiss")
+        if not os.path.exists(faiss_path):
+            st.error(f"Arquivo index.faiss não encontrado em {vector_db_path}")
+            # Listar conteúdo do diretório para debug
+            files = os.listdir(vector_db_path)
+            st.write(f"Arquivos encontrados no diretório: {', '.join(files)}")
+            return None
+        
         with st.spinner("Carregando base de conhecimento legal..."):
+            st.info(f"Tentando carregar FAISS de: {vector_db_path}")
+            
+            # Verificar se o arquivo index_config.json existe
+            config_path = os.path.join(vector_db_path, "index_config.json")
+            if not os.path.exists(config_path):
+                st.warning("Arquivo index_config.json não encontrado. Isto pode causar problemas ao carregar o índice.")
+            
+            # Carregar o vector store
             vector_store = FAISS.load_local(
                 vector_db_path, 
                 embedding_model,
@@ -192,10 +213,17 @@ def load_legal_vector_store(vector_db_path, embedding_model):
                     info = f.read()
                     if "faiss_legal_store_gemini" not in info:
                         st.warning("Esta base não foi otimizada para documentos legais")
+            else:
+                # Se não existe o arquivo info mas o diretório tem "legal" no nome, consideramos como base legal
+                if "legal" in vector_db_path.lower() or "faiss_legal_store" in vector_db_path.lower():
+                    st.info("Base reconhecida como legal pelo nome do diretório")
+                else:
+                    st.warning("Esta base pode não ser otimizada para documentos legais")
         
         return vector_store
     except Exception as e:
         st.error(f"Erro ao carregar vector store legal: {str(e)}")
+        st.exception(e)  # Exibe o traceback completo para debug
         return None
 
 
@@ -203,19 +231,40 @@ def get_available_legal_bases(base_dir):
     """Lista todas as bases de conhecimento legal disponíveis no diretório escolhido"""
     bases = {}
     if os.path.exists(base_dir):
+        # Verifica diretórios no local atual
         for base_name in os.listdir(base_dir):
             base_path = os.path.join(base_dir, base_name)
-            if os.path.isdir(base_path) and os.path.exists(os.path.join(base_path, "index.faiss")):
-                # Verificar se é uma base legal
-                info_path = os.path.join(base_path, "index_info.txt")
-                is_legal = False
-                if os.path.exists(info_path):
-                    with open(info_path, "r") as f:
-                        is_legal = "faiss_legal_store_gemini" in f.read()
+            if os.path.isdir(base_path):
+                # Verifica se o diretório atual tem index.faiss
+                if os.path.exists(os.path.join(base_path, "index.faiss")):
+                    # Verificar se é uma base legal
+                    info_path = os.path.join(base_path, "index_info.txt")
+                    is_legal = False
+                    if os.path.exists(info_path):
+                        with open(info_path, "r") as f:
+                            is_legal = "faiss_legal_store_gemini" in f.read()
+                    
+                    # Se o nome do diretório já contém faiss_legal_store, marcamos como legal
+                    if "faiss_legal_store_gemini" in base_name or "faiss_legal_store_openai" in base_name:
+                        is_legal = True
+                    
+                    # Adicionar à lista, marcando se é legal ou não
+                    name_display = f"{base_name} [LEGAL]" if is_legal else base_name
+                    bases[name_display] = base_path
                 
-                # Adicionar à lista, marcando se é legal ou não
-                name_display = f"{base_name} [LEGAL]" if is_legal else base_name
-                bases[name_display] = base_path
+                # Verifica se existe um diretório faiss_legal_store_gemini dentro do diretório atual
+                gemini_dir = os.path.join(base_path, "faiss_legal_store_gemini")
+                if os.path.isdir(gemini_dir) and os.path.exists(os.path.join(gemini_dir, "index.faiss")):
+                    name_display = f"{base_name}/faiss_legal_store_gemini [LEGAL]"
+                    bases[name_display] = gemini_dir
+                
+                # Verifica se existe um diretório faiss_legal_store_openai dentro do diretório atual
+                openai_dir = os.path.join(base_path, "faiss_legal_store_openai")
+                if os.path.isdir(openai_dir) and os.path.exists(os.path.join(openai_dir, "index.faiss")):
+                    name_display = f"{base_name}/faiss_legal_store_openai [LEGAL]"
+                    bases[name_display] = openai_dir
+    
+    st.write(f"Bases encontradas: {len(bases)}")
     return bases
 
 
@@ -279,6 +328,7 @@ def use_existing_legal_base(embedding_model):
     """Interface para usar bases legais existentes"""
     folder_path = st.text_input(
         "Caminho da pasta com bases legais existentes:",
+        value="." if not st.session_state.get('base_dir') else st.session_state.get('base_dir'),
         help="Digite o caminho completo onde estão suas bases"
     )
     
@@ -290,11 +340,34 @@ def use_existing_legal_base(embedding_model):
         st.error(f"A pasta {folder_path} não existe")
         return
     
+    # Exibir o caminho completo normalizado para debug
+    abs_path = os.path.abspath(folder_path)
+    st.info(f"Buscando bases em: {abs_path}")
+    
     bases = get_available_legal_bases(folder_path)
     
     if not bases:
-        st.warning(f"Nenhuma base encontrada em {folder_path}")
-        return
+        # Tentar buscar nas pastas padrão
+        standard_paths = [
+            os.path.join(folder_path, "faiss_legal_store_gemini"),
+            os.path.join(folder_path, "faiss_legal_store_openai"),
+            "faiss_legal_store_gemini",
+            "faiss_legal_store_openai"
+        ]
+        
+        for path in standard_paths:
+            if os.path.exists(path) and os.path.isdir(path):
+                st.info(f"Verificando pasta padrão: {path}")
+                bases.update(get_available_legal_bases(path))
+        
+        if not bases:
+            st.warning(f"Nenhuma base encontrada em {folder_path} ou nas pastas padrão")
+            
+            # Exibir diretórios existentes para debug
+            if os.path.exists(folder_path):
+                dirs = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
+                st.write(f"Diretórios disponíveis: {', '.join(dirs)}")
+            return
     
     selected_base = st.selectbox(
         "Selecione a base legal:",
@@ -303,15 +376,21 @@ def use_existing_legal_base(embedding_model):
     
     if selected_base and st.button("Carregar Base Legal"):
         try:
-            vector_store = load_legal_vector_store(bases[selected_base], embedding_model)
+            base_path = bases[selected_base]
+            st.info(f"Carregando base de: {base_path}")
+            
+            vector_store = load_legal_vector_store(base_path, embedding_model)
             
             if vector_store:
                 st.session_state['vector_store'] = vector_store
                 st.session_state['base_dir'] = folder_path
                 st.success(f"Base '{selected_base}' carregada com sucesso!")
+            else:
+                st.error("Falha ao inicializar o vector store")
         
         except Exception as e:
             st.error(f"Erro ao carregar base legal: {str(e)}")
+            st.exception(e)  # Exibe o traceback completo para debug
 
 
 def handle_legal_query(model):
