@@ -446,51 +446,20 @@ def handle_legal_query(model):
                     
                     response = model.generate_content(prompt)
                 
-                # Formatar resposta jurídica, incluindo metadados das fontes consultadas
-                resposta_formatada = response.text
-                
-                # Adicionar seção de fontes consultadas à resposta
-                fontes_html = "\n\n### Fontes Consultadas\n"
-                for i, doc in enumerate(results):
-                    # Extrair informações relevantes dos metadados
-                    metadata = doc.metadata
-                    fonte_info = ""
-                    
-                    # Verificar se existem campos específicos nos metadados
-                    if 'id' in metadata:
-                        fonte_info += f"**ID**: {metadata['id']} "
-                    if 'tipo_documento' in metadata:
-                        fonte_info += f"**Tipo**: {metadata['tipo_documento']} "
-                    if 'data' in metadata:
-                        fonte_info += f"**Data**: {metadata['data']} "
-                    if 'jurisdicao' in metadata:
-                        fonte_info += f"**Jurisdição**: {metadata['jurisdicao']} "
-                        
-                    # Se não tiver metadados específicos, mostrar todos disponíveis
-                    if not fonte_info:
-                        # Listar todos os metadados disponíveis, exceto texto
-                        campos = [f"**{k}**: {v}" for k, v in metadata.items() 
-                                 if k != 'texto' and k != 'texto_legal']
-                        fonte_info = " | ".join(campos) if campos else "Sem metadados detalhados"
-                    
-                    fontes_html += f"- {fonte_info}\n"
-                
-                # Adicionar as fontes à resposta
-                resposta_completa = resposta_formatada + fontes_html
-                
-                # Exibir a resposta com as fontes
+                # Exibir a resposta sem as fontes incorporadas
                 st.subheader("Resposta Jurídica:")
-                st.markdown(resposta_completa)
+                st.markdown(response.text)
                 
+                # Expander para o contexto legal
                 with st.expander("Ver contexto legal utilizado"):
                     st.markdown(context)
                 
-                # Mostrar metadados completos dos documentos utilizados em um expander separado
-                with st.expander("Detalhes completos dos documentos consultados"):
+                # Expander separado para metadados no formato JSON
+                with st.expander("Metadados dos documentos consultados"):
                     for i, doc in enumerate(results):
                         st.subheader(f"Documento {i+1}")
+                        # Exibir em formato JSON como na captura de tela
                         st.json(doc.metadata)
-                        st.divider()
             
             except Exception as e:
                 st.error(f"Erro na consulta jurídica: {str(e)}")
