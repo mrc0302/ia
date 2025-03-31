@@ -162,7 +162,7 @@ def main():
             raise ValueError("Formato de arquivo não suportado")
 
     llm =  GoogleGenerativeAI(
-                model="gemini-2.0-flash-thinking-exp-01-21",
+                model="gemma-3-27b-it",
                 google_api_key=google_api_key,
                 temperature=0.7
             )
