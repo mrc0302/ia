@@ -28,7 +28,7 @@ from langchain.schema import Document
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-st.set_page_config(page_title="Consulta de Documentos com faiss", layout="wide")
+#st.set_page_config(page_title="Consulta de Documentos com faiss", layout="wide")
 
 
 def main():
