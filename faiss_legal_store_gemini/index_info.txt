@@ -1,0 +1,4 @@
+type: faiss_legal_store_gemini
+num_documents: 1503
+num_chunks: 5484
+embedding_model: models/embedding-001
