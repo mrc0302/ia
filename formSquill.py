@@ -11,7 +11,7 @@ import streamlit as st
 import time
 from streamlit_quill import st_quill
 import re
-from databasePostgres  import Database
+from database  import Database
 import html
 from docx import Document
 from docx.shared import Pt, RGBColor
