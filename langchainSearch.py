@@ -50,7 +50,7 @@ def main():
         }
 
         model = genai.GenerativeModel(
-            model_name="gemma-3-27b-it",
+            model_name="learnlm-2.0-flash-experimental",
             #generation_config=generation_config
         )
         return model
