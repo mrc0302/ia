@@ -48,7 +48,7 @@ def main():
     #-------------------------------------------------------------------------------
     genai.configure(api_key=os.getenv("google_api_key"))
    
-
+    
     def get_model():  # retorna o modelo para pergunta, diferente do embedding   
         generation_config = {
             "temperature": 0.1,
@@ -64,7 +64,8 @@ def main():
         )
         return model
         #-------------------------------------------------------------------------------
-
+    llm =  get_model
+  
     def get_mq_retriever(vector_store, llm):
         
         mq_retriever = MultiQueryRetriever.from_llm(
@@ -170,11 +171,7 @@ def main():
         else:
             raise ValueError("Formato de arquivo não suportado")
 
-    # llm =  GoogleGenerativeAI(
-    #             model="gemma-3-1b-itt",
-    #             google_api_key=google_api_key,
-    #             temperature=0.7
-    #         )
+    
 
     # Inicializar estado da sessão
     if "messages" not in st.session_state:
@@ -220,6 +217,7 @@ def main():
             return None
 
     vector_store = carregar_vector_store()
+    
 
     def perform_web_search(query, num_results=5):
         try:
@@ -263,13 +261,11 @@ def main():
 
             contexto_completo=""            
 
-            
-            vector_store = carregar_vector_store()
             retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={
-                                                              "k": 4,           # Retorna 4 documentos
+                                                              "k": 5,           # Retorna 4 documentos
                                                               "fetch_k": 20,    # Busca 10 candidatos iniciais
-                                                              "lambda_mult": 0.2 , # > 0.5 estou mais focado na similaridade 0.5 < esto mais focado na diversidade 
-                                                              "score_threshold": 0.4,  # Threshold baixa similaridade
+                                                              "lambda_mult": 0.9 , # > 0.5 estou mais focado na similaridade 0.5 < esto mais focado na diversidade 
+                                                              "score_threshold": 0.3,  # Threshold baixa similaridade
                                                 })
            
             retrieved_docs = retriever.invoke(query) # para gerar subconsultas
@@ -281,7 +277,7 @@ def main():
 
            # st.write(contexto_completo)
 
-            query += f" responda sempre em português. <contexto>{contexto_completo}</contexto>"
+            query += f" responda sempre em português de forma objetiva, com base exclusivamente no contexto. <contexto>{contexto_completo}</contexto> .Se não          encontrar informações relevantes no contexto, responda 'Desculpe, não foram encontradas informações suficientes para responder a essa pergunta.'"
                        
             return query            
         
@@ -351,7 +347,7 @@ def main():
             yield word + " "
             time.sleep(0.02)
 
-    vector_store = carregar_vector_store()
+   
 
     if vector_store:
         # Sidebar
@@ -490,7 +486,7 @@ def main():
                                                     st.session_state.chat_history, 
                                                     st.session_state.uploaded_files
                                                     )         
-                        resposta = st.session_state.chat_session.send_message(prompt_formatado)    
+                        resposta = st.session_state.chat_session.send_message(prompt_formatado) #, history=st.session_state.chat_history  
 
                     with st.chat_message("assistant", avatar="⚖️"):
                         
