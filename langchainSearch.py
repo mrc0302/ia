@@ -23,6 +23,7 @@ import pandas as pd
 from io import StringIO
 from langchain.docstore.document import Document
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,14 @@ logger = logging.getLogger(__name__)
 
 def main():
         
+
+    # Configuração da página
+    st.set_page_config(
+        page_title="Sistema de Modelos Judiciais",
+        page_icon="🧊", 
+        layout="wide",  
+        initial_sidebar_state="expanded"
+    )
         # Configuração da página
 
 
@@ -42,7 +51,7 @@ def main():
 
     def get_model():  # retorna o modelo para pergunta, diferente do embedding   
         generation_config = {
-            "temperature": 1,
+            "temperature": 0.1,
             "top_p": 0.95,
             "top_k": 64,
             "max_output_tokens": 8192,
@@ -51,7 +60,7 @@ def main():
 
         model = genai.GenerativeModel(
             model_name="learnlm-2.0-flash-experimental",
-            #generation_config=generation_config
+            generation_config=generation_config
         )
         return model
         #-------------------------------------------------------------------------------
@@ -161,11 +170,11 @@ def main():
         else:
             raise ValueError("Formato de arquivo não suportado")
 
-    llm =  GoogleGenerativeAI(
-                model="gemini-2.0-flash-thinking-exp-01-21",
-                google_api_key=google_api_key,
-                temperature=0.7
-            )
+    # llm =  GoogleGenerativeAI(
+    #             model="gemma-3-1b-itt",
+    #             google_api_key=google_api_key,
+    #             temperature=0.7
+    #         )
 
     # Inicializar estado da sessão
     if "messages" not in st.session_state:
@@ -254,79 +263,26 @@ def main():
 
             contexto_completo=""            
 
-            historico = "\n".join([
-                f"Humano: {msg['content'] if msg['role'] == 'user' else ''}\nAssistente: {msg['content'] if msg['role'] == 'assistant' else ''}"
-                for msg in historico[-3:]
-            ])
+            
+            vector_store = carregar_vector_store()
+            retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={
+                                                              "k": 4,           # Retorna 4 documentos
+                                                              "fetch_k": 20,    # Busca 10 candidatos iniciais
+                                                              "lambda_mult": 0.2 , # > 0.5 estou mais focado na similaridade 0.5 < esto mais focado na diversidade 
+                                                              "score_threshold": 0.4,  # Threshold baixa similaridade
+                                                })
+           
+            retrieved_docs = retriever.invoke(query) # para gerar subconsultas
+           
+            arquivos_texto = "\n\n".join([doc.page_content for doc in retrieved_docs])
+                                
+            contexto_completo = arquivos_texto  
+            
 
-            # Realizar busca na web apenas se o toggle estiver ativado
-            if st.session_state.use_web_search:
-                web_results = ""
-                if st.session_state.get('web_search_toggle', True):
-                    with st.spinner("Buscando informações na web..."):
-                        web_search_results = perform_web_search(query)
-                        if web_search_results and not web_search_results.startswith("Erro"):
-                            web_results = f"\n\nInformações da Web:\n{web_search_results}"
-
-                contexto_completo = f"{web_results}"
-                            
-            elif st.session_state.use_juris_search :
-                                            
-                resultados = re.findall(r'\((.*?)\)', prompt)
-                    #q=cancelamento+de+voo
-                url = f"https://www.jusbrasil.com.br/jurisprudencia/busca?q={resultados}"
-                
-                for _ in range(5):
-                        try:
-                            scraper = cloudscraper.create_scraper()
-                            response = scraper.get(url)
-                            time.sleep(2)
-                            if "Just a moment" not in response.text:
-                                soup = BeautifulSoup(response.text, 'html.parser')
-                                page_content = soup.get_text(separator='\n', strip=True)
-                        except:
-                            page_content =""
-                            pass
-                contexto_completo = f"{page_content}"   
-                
-            elif st.session_state.documentos_contexto:    
-                # Formatando contexto dos documentos do vector store
-                contexto_texto = ""
-                if contexto_docs:
-                    contexto_docs = "\n\n".join([
-                        f"Documento do Vector Store {i+1}:\n<assunto> {doc.metadata.get('assunto', 'N/A')}</assunto>\n<texto>: {doc.page_content}</texto>"
-                        for i, doc in enumerate(contexto_docs)
-                    ])
-                
-                contexto_completo = f"{contexto_docs}"                
-                            
-            elif st.session_state.uploaded_files:
-                # Adicionando conteúdo dos arquivos carregados
-                arquivos_texto = ""
-                if uploaded_files:
-                    arquivos_texto = "\n\n".join([
-                        f"Arquivo Carregado {i+1} - {arquivo['name']}:\n{arquivo['content'][:3000]}"
-                        for i, arquivo in enumerate(uploaded_files)
-                    ])
-                contexto_completo = f"{arquivos_texto}"                
-            else:#se não houver contexto
-                vector_store = carregar_vector_store()
-                retriever = vector_store.as_retriever()
-                mq_retriever= get_mq_retriever(vector_store, llm) 
-                #retrieved_docs = retriever.get_relevant_documents(query)  
-                retrieved_docs = mq_retriever.get_relevant_documents(query)               
-
-                arquivos_texto = "\n\n".join([doc.page_content for doc in retrieved_docs])
-                                    
-                contexto_completo = arquivos_texto  
-                
-
-                #st.write(contexto_completo)
+           # st.write(contexto_completo)
 
             query += f" responda sempre em português. <contexto>{contexto_completo}</contexto>"
-            
-            # # Carregar e executar a chain de QA
-            
+                       
             return query            
         
         except Exception as e:
@@ -539,7 +495,14 @@ def main():
                     with st.chat_message("assistant", avatar="⚖️"):
                         
                         #st.text(f"Resposta \n\n:{resposta.text}") 
-                        st.write_stream(stream_data(resposta.text))                     
+                        #st.write_stream(stream_data(resposta.text))
+                        #st.markdown(f"Resposta \n\n:{resposta.text}", unsafe_allow_html=True)
+                        st.markdown(f"""
+                            <div style="text-align: justify; font-family: Verdana; font-size: 14px;">
+                                {resposta.text}
+                            </div>
+                            """, unsafe_allow_html=True)
+
                         st.session_state.messages.append({"role": "assistant", "content": f" {resposta.text}"})
                         st.session_state.chat_history.extend([
                             {'role': 'user', 'content': prompt},
