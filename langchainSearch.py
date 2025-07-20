@@ -52,7 +52,7 @@ def main():
     #google_api_key = os.getenv("google_api_key")
     google_api_key = "AIzaSyBJ9ifJikSVNqF7njMoc-wlcIrdjLWcvY4"     
     #-------------------------------------------------------------------------------
-    genai.configure(api_key="AIzaSyBJ9ifJikSVNqF7njMoc-wlcIrdjLWcvY4"))  
+    genai.configure(api_key="AIzaSyBJ9ifJikSVNqF7njMoc-wlcIrdjLWcvY4")  
 
     # Modelos disponíveis
     models = [
