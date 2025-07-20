@@ -1,237 +1,424 @@
+/* styles.css */
+/* IMPORTAR FONTES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-.st-key-confirm_yes button{
-
-    background-color: rgb(17, 17, 17) !important;
-    color: white !important;
-    width: 150px !important; 
-    margin: 15%;    
+/* === OCULTAR ELEMENTOS DO STREAMLIT === */
+header[data-testid="stHeader"] {
+    display: none !important;
 }
-.st-key-confirm_yes button:hover{
+
+#MainMenu {
+    visibility: hidden !important;
+}
+
+footer {
+    visibility: hidden !important;
+}
+
+.stMainBlockContainer {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
     
-    box-shadow: 0 0 10px rgb(187, 64, 64);
-    background-color: rgb(139, 11, 11) !important;
-    font-weight: bold !important;
-    width: 150px !important;     
 }
-
-.st-key-confirm_no button{
-
-    background-color: rgb(17, 17, 17) !important;
-    color: white !important;
-    width: 150px !important; 
-    margin: 15%; 
-
-}
-
-.st-key-confirm_no button:hover{
-    box-shadow: 0 0 10px rgb(187, 64, 64);
-    background-color: rgb(139, 11, 11) !important;
-    font-weight: bold !important;
-    width: 150px !important;   
-
-}
-
-.st-key-search button{  
-
-    background-color: rgb(211, 31, 31) !important;
-    color: white !important;
-    width: 150px !important;
-}
-
-.stDialog .st-fo{
-
-    align-self: center;
-    font-weight: bold !important;
-}
-
-.stDialog .st-f4{ /*título da mensagem*/
-
-    background-color: rgb(27, 2, 73) !important;
-    color: white !important;
-    align-content: center;    
-}
-
-.stForm button{
-
-    background-color: rgb(17, 16, 16) !important;
-    color: white !important;
-    width: 150px !important;
-    margin-top: 10px;
-    margin-left: 20%;    
-}
-
-.stForm button:hover{
-    box-shadow: 0 0 10px rgb(187, 64, 64);
-    background-color: rgb(139, 11, 11) !important;
-    font-weight: bold !important;
-    width: 150px !important;     
-
-}
-
-.form_submit_button {/*engloba o checkbox também*/
-   
-    color: white !important;
-    width: 150px;
-   
-    font-weight: bold;    
-    border: none;
-    position: absolute !important; 
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important; 
-    margin-top: 20px;
-    width: 150px !important;
-
-}
-
-.st-emotion-cache-1vxvi18.e1obcldf2 p {
+div[data-testid="stChatMessage"] {
     
-    color: rgb(226, 225, 230);    
-    font-size: smaller;
-    width: 300px;
-}
-
-
-
-.st-emotion-cache-1dho8c7.enj44ev3{
-    background-color: #273346 !important;   
-    border: none !important; 
-    color:white  !important;
-        
-}
-
-.st-emotion-cache-z22cl0.enj44ev1 :hover {
-    
-    color:white  !important; 
-}
-
-.e1jram340 {
-    font-size: 3px !important;  
-    font-weight: bold !important;
-}
-
-.st-emotion-cache-1vxvi18.e1obcldf2 {/*resultado da pesquisa*/
-    /* Seus estilos aqui */
+    /* border: 1px solid #dee2e6 !important; 
+    border-radius: 1rem !important;*/
+    /*padding: 1.5rem !important;*/
+    border: none !important;
+    box-shadow: none !important;
     background: none !important;
-    border: none !important;
-    color: inherit !important; 
-    text-align: left !important;
-    width: 330px !important; 
-   
-   
-    /* Adicione outros estilos que desejar */
+    overflow-y: auto !important;
+    padding: 0% !important;
 }
 
-/* Para remover o efeito hover */
-.st-emotion-cache-1vxvi18.e1obcldf2:hover { /*resultado da pesquisa*/
-    /* background: none !important; */
-    background-color: rgb(32, 31, 31) !important; 
-    width: 330px !important; 
-    
-    border: none !important;
-    color: rgb(195, 198, 204) !important;  
-    
-    /* outros estilos que queira manter fixos no hover */
+/* === ELEMENTOS BÁSICOS === */
+.st-emotion-cache-1lvxfs7 h3 {
+    font-size: 20px !important;
 }
-/*   
-.stDialog button {   
+
+[data-testid="stMetric"] > div {
+    font-size: 1.5em !important;
+}
+
+[data-testid="stMetric"] p {
+    font-size: 1.5em !important;
+}
+
+/* === SIDEBAR === */
+div[data-testid="stSidebarHeader"] {
+    padding-bottom: 0rem !important;
    
-    font-weight: bold !important; 
-  
-} */
+}
 
-button[aria-label="Close"] {
-    /*display: none !important; */
-    color: rgb(226, 225, 230);   
+[data-testid="stSidebarUserContent"] div {
+    font-size: 18px !important;
+    font-weight: 100 !important;
+    color: #030303 !important;
     
-} 
+}
 
-/* div[aria-label="dialog"] {
-    height: 140px!important;
-    width: 360px!important;
-    
-} */
-/* 
-.st-fc {
-    height: 140px!important;
-    width: 360px!important;
-    
-    background-color: #e91212 !important; 
-} */
-/* 
+[data-testid="stSidebarUserContent"] h3 {
+    font-size: 18px !important;
+    font-weight: 100 !important;
+    color: #030303 !important;
+}
 
-.st-f9 {
+section[data-testid="stSidebar"] {
+    font-family: 'Inter', sans-serif;
+}
 
-    height: 70px;
-    width: 360px;  
-     
-    background-color: #050505 !important; 
-} */
+[data-testid="stSidebarUserContent"] h1,
+[data-testid="stSidebarUserContent"] h2,
+[data-testid="stSidebarUserContent"] h3 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #111827;
+}
 
-/*   container */ 
-iframe[data-testid="stCustomComponentV1"] {   
-    /* min-width: 100%; 
-    min-height: 100%; */
-    /* height: 900px;    */
-    padding: 0% 0% 0% 0%;  
-    background-color: #f0f8ff !important; 
-} 
+/* === TABS === */
+
+button[data-testid="stTab"] div[data-testid="stMarkdownContainer"] p {
+    font-size: 20px !important;
+    font-weight: 100px !important;
+    color: #080808 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* === CHAT INPUT === */
+[data-testid="stChatInput"] {
+    margin: 1rem 0 !important;
+   
+   /* padding: 0.5rem !important;*/
+}
 
 .stTextInput input {
-    
-    width: 100% !important;  
-    background-color: #f0f8ff !important;
-
+    font-size: 18px !important;
+    color: #000207 !important;
+}
+.stSelectbox input{
+    font-size: 18px !important;
+    color: #000207 !important;
 
 }
 
-.stTextInput p {    
-    font-size: larger;
-
+[data-testid="stChatInputTextArea"] {
+    font-size: 18px !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+    /*padding: 16px 20px !important;*/
+    min-height: 80px !important;
+    max-height: 200px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    resize: vertical !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    width: 100% !important;
 }
-/*     
-#text_input_1 {
-    background-color: #f0f8ff !important;
-    border: 1.5px solid #060f06!important;
-    border-radius: 8px;    
-    color: black;
-    font-size: 16px;
-    padding: 10px;
-}
 
-#text_input_2 {
-    
-    background-color: #f0f8ff !important;
-    border: 1.5px solid #060f06!important;
-    border-radius: 8px;
-    
-    color: black;
-    font-size: 16px;
-    padding: 10px;
-} */
-/* 
-#text_input_3 {
+[data-testid="stChatInputTextArea"]:focus {
    
-    background-color: #f0f8ff !important;
-    border: 1.5px solid #060f06 !important;    
-    border-radius: 8px;
-    color: black;
-    font-size: 16px;
-    padding: 10px;
-} */
-
-.stForm {
-   
-    border: none; /*2px solid black;*/
-    width: 1200px;
-    height: 500px;
-   
+    outline: none !important;
+   /* box-shadow: 0 0 0 3px rgba(167, 196, 241, 0.1), 0 4px 12px rgba(0,0,0,0.1) !important;
+    background: #fafbfc !important;*/
 }
 
-[data-testid="stVerticalBlockBorderWrapper"] {/*quill*/
+[data-testid="stChatInputTextArea"]::placeholder {
+    color: #080808 !important;
+    font-size: 18px !important;
+    font-weight: 400 !important;
+   /* opacity: 0.7 !important;*/
+}
 
-    border: none;    
-    padding: 0%  
+div[data-baseweb="textarea"] {
+    width: 100% !important;
+    min-height: 80px !important;
+}
+
+
+[data-testid="stChatInputSubmitButton"] {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 10px !important;
+    background: #404142 !important;
+    border: none !important;
+    margin-left: 8px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-testid="stChatInputSubmitButton"]:hover:not(:disabled) {
+    background: #000207 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(7, 8, 8, 0.4) !important;
+    justify-content: center !important;
+}
+
+[data-testid="stChatInputSubmitButton"]:disabled {
+    background: #9ca3af !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+}
+
+[data-testid="stChatInputSubmitButton"] svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: rgb(255, 255, 255) !important;
+    justify-content: center !important;
+    margin: auto !important;
+}
+
+.stChatInput {
+    background: transparent !important;
+    border: none !important;
+    padding: 1rem 0 !important;
+}
+
+.st-emotion-cache-s1k4sy {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+[data-testid="InputInstructions"] {
+    margin-top: 8px !important;
+    font-size: 14px !important;
+    color: #6b7280 !important;
+}
+
+/* === MENSAGENS DO CHAT === */
+[data-testid="stChatMessage"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    margin: 1rem 0 !important;
+    padding: 1.5rem !important;
+    /*border-radius: 12px !important;*/
+    /*border: 1px solid #e5e7eb !important;*/
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+[data-testid="stChatMessage"][data-testid*="user"] {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border-color: #0ea5e9 !important;
+}
+
+[data-testid="stChatMessage"][data-testid*="assistant"] {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-color: #64748b !important;
+}
+
+[data-testid="stChatMessage"] img {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+/* === MARKDOWN NAS MENSAGENS === */
+[data-testid="stChatMessage"] .stMarkdown {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    color: #1e293b !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: 'Crimson Text', Georgia, 'Times New Roman', serif !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown p {
+    font-size: 18px !important;
+    margin-bottom: 1.2rem !important;
+    text-align: justify !important;
+    line-height: 1.8 !important;
+    color: #1e293b !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown h1 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 1.5rem 0 1rem 0 !important;
+    border-bottom: 2px solid #3b82f6 !important;
+    padding-bottom: 0.5rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown h2 {
+    font-size: 21px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 1.2rem 0 0.8rem 0 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown h3 {
+    font-size: 19px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 1rem 0 0.6rem 0 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown ul,
+[data-testid="stChatMessage"] .stMarkdown ol {
+    font-size: 18px !important;
+    margin: 1rem 0 !important;
+    padding-left: 2rem !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown li {
+    font-size: 18px !important;
+    margin-bottom: 0.8rem !important;
+    line-height: 1.8 !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown strong {
+    font-weight: 700 !important;
+    color: #080808 !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown em {
+    font-style: italic !important;
+    color: #475569 !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown code {
+    background: #f1f5f9 !important;
+    color: #1e40af !important;
+    padding: 0.2rem 0.4rem !important;
+    border-radius: 4px !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    font-size: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown blockquote {
+    border-left: 4px solid #3b82f6 !important;
+    margin: 1.5rem 0 !important;
+    padding: 1rem 1.5rem !important;
+    background: #d2e7fc !important;
+    border-radius: 0 8px 8px 0 !important;
+    font-style: italic !important;
+    font-size: 18px !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08) !important;
+}
+
+/* === CONTAINER DO CHAT === */
+[data-testid="stVerticalBlockBorderWrapper"]{    
+   
+    margin: 0rem  !important;
+}
+
+/* === BOTÕES === */
+.stButton > button {
+    border-radius: 6px !important;
+    border: 1px solid #e1e5e9 !important;
+    background: #ffffff !important;
+    color: #374151 !important;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    background: #f8fafc !important;
+    border-color: #3b82f6 !important;
+    color: #1e40af !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* === EXPANDERS === */
+details[data-testid="stExpander"] summary {
+    padding: 14px 18px !important;
+    background: #fafbfc !important;
+    border: 1px solid #e1e5e9 !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+details[data-testid="stExpander"] summary:hover {
+    background: #f1f5f9 !important;
+    border-color: #3b82f6 !important;
+    color: #1e40af !important;
+}
+
+details[data-testid="stExpander"] > div {
+    padding: 20px !important;
+    border: 1px solid #e1e5e9 !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+    background: #ffffff !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+
+/* === ANIMAÇÕES === */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    [data-testid="stChatInputTextArea"] {
+        font-size: 16px !important;
+        /* padding: 14px 16px !important;
+        min-height: 70px !important; */
+    }
     
-} 
-
+    [data-testid="stChatInputTextArea"]::placeholder {
+        font-size: 16px !important;
+    }
+    
+    [data-testid="stChatInputSubmitButton"] {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    
+    .stMarkdown {
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+    }
+    
+    .stMarkdown h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 1.3rem !important;
+    }
+}
+ 
+@media (max-width: 480px) {
+    [data-testid="stChatInputTextArea"] {
+        font-size: 15px !important;
+       /* padding: 12px 14px !important;*/
+        min-height: 60px !important;
+    }
+    
+    [data-testid="stChatInputTextArea"]::placeholder {
+        font-size: 15px !important;
+    }
+}
