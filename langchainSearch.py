@@ -30,13 +30,6 @@ from langchain.prompts.chat import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 from langchain.chains import create_retrieval_chain
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-
 def main():
            
 
