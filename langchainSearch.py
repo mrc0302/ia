@@ -41,12 +41,12 @@ def main():
            
 
     # Configuração da página
-    st.set_page_config(
-        page_title="Sistema de Modelos Judiciais",
-        page_icon="🧊", 
-        layout="wide",  
-        initial_sidebar_state="expanded"
-    )
+    #st.set_page_config(
+     #   page_title="Sistema de Modelos Judiciais",
+      #  page_icon="🧊", 
+       # layout="wide",  
+        #initial_sidebar_state="expanded"
+    #)
     
     def load_css(file_name):
         with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
