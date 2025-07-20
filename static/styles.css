@@ -8,7 +8,7 @@ header[data-testid="stHeader"] {
 }
 
 #MainMenu {
-    visibility: hidden !important;
+    visibility: visible !important;
 }
 
 footer {
