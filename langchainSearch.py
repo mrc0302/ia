@@ -49,7 +49,8 @@ def main():
 
         # Carregar variáveis de ambiente
     load_dotenv()
-    google_api_key = os.getenv("google_api_key")
+    #google_api_key = os.getenv("google_api_key")
+    google_api_key = st.secrets.get("google_api_key")       
     #-------------------------------------------------------------------------------
     genai.configure(api_key=os.getenv("google_api_key"))  
 
