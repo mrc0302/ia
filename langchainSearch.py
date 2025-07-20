@@ -707,8 +707,8 @@ def main():
     if vector_store:
         # Sidebar
         colSideBAr, colChatbot = st.columns([1, 20])
-        with colSideBAr:
-        #with st.sidebar:            
+        #with colSideBAr:
+        with st.sidebar:            
             tab1, tab2, tab3 = st.tabs(["Pesquisa", "Arquivos","Configurações"])
             with tab1:                 
                 expander_pesq = st.expander("🔍 Filtros de Busca", expanded=True)                
