@@ -41,12 +41,12 @@ def main():
            
 
     # Configuração da página
-    #st.set_page_config(
-     #   page_title="Sistema de Modelos Judiciais",
-      #  page_icon="🧊", 
-       # layout="wide",  
-        #initial_sidebar_state="expanded"
-    #)
+    st.set_page_config(
+        page_title="Sistema de Modelos Judiciais",
+        page_icon="🧊", 
+        layout="wide",  
+        initial_sidebar_state="expanded"
+    )
     
     def load_css(file_name):
         with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
@@ -707,8 +707,8 @@ def main():
     if vector_store:
         # Sidebar
         colSideBAr, colChatbot = st.columns([1, 20])
-        #with colSideBAr:
-        with st.sidebar:            
+        with colSideBAr:
+        #with st.sidebar:            
             tab1, tab2, tab3 = st.tabs(["Pesquisa", "Arquivos","Configurações"])
             with tab1:                 
                 expander_pesq = st.expander("🔍 Filtros de Busca", expanded=True)                
