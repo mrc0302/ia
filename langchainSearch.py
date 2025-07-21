@@ -68,7 +68,8 @@ def main():
         generation_config=generation_config
        )
         return model
-       
+
+    
         #-------------------------------------------------------------------------------
     llm =  ChatGoogleGenerativeAI(
             model="learnlm-2.0-flash-experimental",
@@ -490,7 +491,18 @@ def main():
     
         try:
 
-            llm = get_model()          
+            generation_config = {
+                "temperature": 0.4,
+                "top_p": 0.95,
+                "top_k": 50,
+                "max_output_tokens": 8192,
+                "response_mime_type": "text/plain",
+            }
+                  
+            model = genai.GenerativeModel(
+            model_name="learnlm-2.0-flash-experimental",
+                   generation_config=generation_config
+                  )    
             # a variável context deve sempre estar presente. senão dá erro
             prompt_template = """Você é um assistente especialista em direito. 
                                  Responda as perguntas do usuário sempre em português de forma clara.
