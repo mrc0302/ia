@@ -50,29 +50,10 @@ def main():
         # Carregar variáveis de ambiente
     load_dotenv()
     #google_api_key = os.getenv("google_api_key")
-    google_api_key = "AIzaSyBJ9ifJikSVNqF7njMoc-wlcIrdjLWcvY4"     
-    #-------------------------------------------------------------------------------
-    genai.configure(api_key=google_api_key)  
+   
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY")) 
 
-    # Modelos disponíveis
-    models = [
-        "gemini-pro",                    # Modelo padrão
-        "gemini-pro-vision",             # Com suporte a imagens
-        "gemini-1.5-pro",                # Versão mais recente
-        "gemini-1.5-flash",              # Mais rápido
-        "learnlm-2.0-flash-experimental", # Seu modelo atual
-        "gemini-1.5-pro-002",            # Versões específicas
-        "gemini-1.5-flash-002"
-    ]
-    # Tipos MIME suportados
-    mime_types = [
-        "text/plain",     # Texto simples (padrão)
-        "text/html",      # HTML
-        "application/json", # JSON
-        "text/markdown"   # Markdown
-    ]
- 
-    
+       
     def get_model():  # retorna o modelo para pergunta, diferente do embedding   
         generation_config = {
            "temperature": 0.4,
