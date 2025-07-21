@@ -64,7 +64,7 @@ def main():
         }
        
         model = genai.GenerativeModel(
-        model_name="gemini-2.5-pro",
+        model_name="learnlm-2.0-flash-experimental",
         generation_config=generation_config
        )
         return model
@@ -829,7 +829,7 @@ def main():
                         else:
                             filterName = None
                             filterValue = None  
-                    
+                        llm= def get_model
                         prompt_formatado =  gerar_resposta(
                                                     prompt, 
                                                     llm,
