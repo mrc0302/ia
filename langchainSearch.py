@@ -1,19 +1,36 @@
-import streamlit as st
-import os
-import re
+import cloudscraper
+from bs4 import BeautifulSoup
 import time
-from dotenv import load_dotenv
-from io import StringIO
-
-# LangChain e integrações
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import Document
+import logging
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+import re
+from PyPDF2 import PdfReader
+import csv
+import docx
+from googlesearch import search
+from serpapi import GoogleSearch
+import streamlit as st
 from langchain_community.vectorstores import FAISS
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain.chains.Youtubeing import load_qa_chain
+import google.generativeai as genai
+from langchain_google_genai import GoogleGenerativeAI
+from langchain.prompts import PromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.retrievers import MultiQueryRetriever
+from langchain.chains.query_constructor.schema import AttributeInfo
+from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain.chains.question_answering import load_qa_chain
+import os
+from dotenv import load_dotenv
+import json
+import pandas as pd
+from io import StringIO
+from langchain.docstore.document import Document
+from langchain.prompts.chat import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
+
 from langchain.chains import create_retrieval_chain
+
 
 
 # Carregadores de Documentos
