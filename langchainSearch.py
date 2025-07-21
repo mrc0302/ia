@@ -829,7 +829,7 @@ def main():
                         else:
                             filterName = None
                             filterValue = None  
-                        llm= def get_model
+                        llm= get_model()
                         prompt_formatado =  gerar_resposta(
                                                     prompt, 
                                                     llm,
