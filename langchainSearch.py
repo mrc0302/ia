@@ -489,6 +489,8 @@ def main():
     def gerar_resposta(query, llm, vector_store, contexto_docs, historico, uploaded_files, campo, valor_campo):
     
         try:
+
+            llm = get_model()          
             # a variável context deve sempre estar presente. senão dá erro
             prompt_template = """Você é um assistente especialista em direito. 
                                  Responda as perguntas do usuário sempre em português de forma clara.
