@@ -2,6 +2,23 @@
 /* IMPORTAR FONTES */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
+/* styles.css */
+/* IMPORTAR FONTES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* === OCULTAR ELEMENTOS DO STREAMLIT === */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+#MainMenu {
+    visibility: hidden !important;
+}
+
+footer {
+    visibility: hidden !important;
+}
+
 .stMainBlockContainer {
     padding-top: 0px !important;
     padding-bottom: 10px !important;
