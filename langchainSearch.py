@@ -272,7 +272,7 @@ def main():
                 google_api_key=google_api_key
             )
             return FAISS.load_local(
-                "faiss_legal_store_gemini_faiss_legal_store_gemini", 
+                "faiss_legal_store_gemini", 
                 embeddings, 
                 allow_dangerous_deserialization=True
             )
