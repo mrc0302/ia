@@ -28,17 +28,14 @@ from io import StringIO
 from langchain.docstore.document import Document
 from langchain.prompts.chat import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
-
+from langchain.schema import Document
 from langchain.chains import create_retrieval_chain
 
 
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger(__name__)
 
-
-
 def main():
-           
 
     # Configuração da página
     st.set_page_config(
@@ -100,31 +97,7 @@ def main():
             stream=False  # Para streaming de resposta
         )
         return model
-    # def get_model():  # retorna o modelo para pergunta, diferente do embedding   
-    #     generation_config = {
-    #        "temperature": 0.4,
-    #         "top_p": 0.95,
-    #         "top_k": 50,
-    #         "max_output_tokens": 8192,
-    #         "response_mime_type": "text/plain",
-    #     }
-       
-    #     model = genai.GenerativeModel(
-    #     model_name="learnlm-2.0-flash-experimental",
-    #     generation_config=generation_config
-    #    )
-    #     return model
-       
-    #     #-------------------------------------------------------------------------------
-    # llm =  ChatGoogleGenerativeAI(
-    #         model="learnlm-2.0-flash-experimental",
-    #         temperature=0.3,
-    #         max_tokens=8192,
-    #         top_p=0.8,
-    #         top_k=40,
-    #         mime_types = "text/markdown", 
-    #         convert_system_message_to_human=True  # Importante para Gemini
-    #     )
+    
    
     def get_mq_retriever(vector_store, llm):
                 
@@ -138,7 +111,6 @@ def main():
         )
 
         return multi_query_retriever
-    
 
     def get_embeddings():
 
@@ -251,8 +223,9 @@ def main():
         chunks = text_splitter.split_documents(documents)
         
         return chunks
+   
     def create_faiss_vectorstore(chunks):
-        # Usar embeddings HuggingFace (gratuito)
+        
         embeddings = GoogleGenerativeAIEmbeddings(
             model="models/embedding-001",
             google_api_key=google_api_key
@@ -268,7 +241,7 @@ def main():
         # Inicializar estado da sessão
         if "messages" not in st.session_state:
             st.session_state.messages = []
-            
+
         if 'documentos_contexto' not in st.session_state:
             st.session_state.documentos_contexto = []
 
@@ -309,8 +282,7 @@ def main():
      
     init_session()
 
-    vector_store = carregar_vector_store()
-    
+    vector_store = carregar_vector_store()    
 
     def perform_web_search(query, num_results=5):
         try:
@@ -398,8 +370,7 @@ def main():
             arquivos_texto = []
             metadados = []  # Lista para armazenar metadados
 
-            if contexto_docs: # são os documentos da consultas
-                
+            if contexto_docs: # são os documentos da consultas                
                 retrieved_docs = contexto_docs
                 
                 for doc in retrieved_docs:
@@ -407,9 +378,7 @@ def main():
                     arquivos_texto.append(f"{metadata_str}\n{doc.page_content}") # além dos metadados inclui o conteúdo dos documentos
                     metadados.append(doc.metadata)  # Adiciona metadados à lista de metadados com as informações dos documentos
                      
-            elif uploaded_files:    
-                     
-                from langchain.schema import Document
+            elif uploaded_files:                   
 
                 for doc in uploaded_files:
 
@@ -427,7 +396,7 @@ def main():
             elif campo == "classe" and valor_campo:
                 search_kwargs = {
                     "k": 10,
-                    "fetch_k": 100,
+                    "fetch_k": 20,
                     "lambda_mult": 0.5,
                     "score_threshold": 0.4,
                     "filter": {campo: valor_campo}
@@ -440,7 +409,7 @@ def main():
                     metadados.append(doc.metadata)  # Adiciona metadados à lista    
 
             else:
-                retriever = vector_store.as_retriever()                
+                retriever = vector_store.as_retriever( search_type="similarity",  search_kwargs={"k": 5, "fetch_k": 300})               
                 retrieved_docs = retriever.invoke(query)
                 for doc in retrieved_docs:
                     metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
