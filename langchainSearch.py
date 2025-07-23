@@ -59,13 +59,22 @@ def main():
 
     # Modelos disponíveis
     models = [
-        "gemini-pro",                    # Modelo padrão
-        "gemini-pro-vision",             # Com suporte a imagens
-        "gemini-1.5-pro",                # Versão mais recente
-        "gemini-1.5-flash",              # Mais rápido
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",              # Mais rápido
         "learnlm-2.0-flash-experimental", # Seu modelo atual
-        "gemini-1.5-pro-002",            # Versões específicas
-        "gemini-1.5-flash-002"
+        "gemma-3n-e2b-it",
+        "gemma-3n-e4b-it",
+        "gemma-3-1b-it",
+        "gemma-3-4b-it",
+        "gemma-3-12b-it",
+        "gemma-3-27b-it",
+        "gemini-2.0-flash-preview-image-generation",
+        "gemini-2.0-flash-lite",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
+
+        
     ]
     # Tipos MIME suportados
     mime_types = [
@@ -75,9 +84,10 @@ def main():
         "text/markdown"   # Markdown
     ]
  
-    model = genai.GenerativeModel('learnlm-2.0-flash-experimental')
-    def get_model(prompt):
-        model = genai.GenerativeModel('learnlm-2.0-flash-experimental')
+    model = genai.GenerativeModel(model_name="learnlm-2.0-flash-experimental")
+
+    def get_model(prompt, model_name="learnlm-2.0-flash-experimental"):
+        model = genai.GenerativeModel(model_name)
         model.generate_content(
             contents=prompt,  # ou apenas o primeiro parâmetro
             generation_config={
@@ -126,7 +136,7 @@ def main():
         st.session_state.messages = []
 
     def limpar_tudo():
-        init_session()
+       # init_session()
 
         st.session_state.messages = []
         st.session_state.chat_history = []
@@ -135,47 +145,25 @@ def main():
         st.session_state.use_web_search = False
         st.session_state.documentos_contexto = []               
         st.session_state.chat_session = model.start_chat(history=[])
+        st.session_state.campo_selecionado = " "
+        st.session_state.valor_campo_selecionado = " "
+        st.session_state.texto_livre_input = ""
+        
+
+         # Limpar qualquer chave relacionada aos controles
+        keys_to_clear = ['texto_livre_key', 'campo_key', 'valor_campo_key']
+        for key in keys_to_clear:
+            if key in st.session_state:
+                del st.session_state[key]
+        
+        # Força o recarregamento da página
+        st.rerun()
 
     def limpar_apenas_arquivos():
         """Limpa apenas os arquivos carregados, mantendo o chat"""
         st.session_state.uploaded_files = []
 
-    def extract_text_from_csv(uploaded_file):
-
-        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-        text = stringio.read()
-
-        #reader = csv.DictReader(f)
-            
-        # for row in reader:
-        #     textCSV += f"{row.get('id', '')} {row.get('titulo', '')} {row.get('classe', '')} {row.get('conteúdo', '')} \n"
-        # with open("C:/Users/mcres/Documents/documentos.csv", "r", encoding="utf-8") as f:
-        #     reader = csv.DictReader(f)
-        #     text = ""
-
-        #     for row in reader:
-        #         text += f"{row.get('id', '')} {row.get('titulo', '')} {row.get('classe', '')} {row.get('conteúdo', '')} \n"
-            
-        # Dividir texto em chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-        )
-        
-        chunks = text_splitter.split_text(text)
-
-        embeddings = GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
-                google_api_key=google_api_key
-            )
-
-        vectorstore = FAISS.from_texts(chunks, embeddings)
-
-        # # Salvar
-        vectorstore.save_local("faiss_documento_cvs2")
-            
-        return vectorstore
-
+    
     def extract_text_from_pdf(pdf_file):
         pdf_reader = PdfReader(pdf_file)
         text = ""
@@ -236,6 +224,24 @@ def main():
         )
         
         return vectorstore
+   
+    @st.cache_resource
+    def carregar_vector_store():
+        try:
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/embedding-001",
+                google_api_key=google_api_key
+            )
+            return FAISS.load_local(
+                "faiss_legal_store_gemini", 
+                embeddings, 
+                allow_dangerous_deserialization=True
+            )
+        except Exception as e:
+            st.error(f"Erro ao carregar vector store: {str(e)}")
+            return None
+        
+    vector_store = carregar_vector_store()
 
     def init_session():
         # Inicializar estado da sessão
@@ -262,27 +268,42 @@ def main():
             st.session_state.chat_session = model.start_chat(history=[])    
 
         if 'prompt' not in st.session_state:        
-            st.session_state.prompt=None    
+            st.session_state.prompt = None    
+ 
+        if 'campo_selecionado' not in st.session_state:
+           st.session_state.campo_selecionado = " "
+    
+        if 'valor_campo_selecionado' not in st.session_state:
+            st.session_state.valor_campo_selecionado = " "
 
-    @st.cache_resource
-    def carregar_vector_store():
-        try:
-            embeddings = GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
-                google_api_key=google_api_key
-            )
-            return FAISS.load_local(
-                "faiss_legal_store_gemini", 
-                embeddings, 
-                allow_dangerous_deserialization=True
-            )
-        except Exception as e:
-            st.error(f"Erro ao carregar vector store: {str(e)}")
-            return None
-     
+        if 'texto_livre_input' not in st.session_state:
+            st.session_state.texto_livre_input = ""
+
+        if 'model_selecionado' not in st.session_state: 
+            st.session_state.model_selecionado = "learnlm-2.0-flash-experimental"
+        
+        # Configurações de busca
+        if 'search_config' not in st.session_state:
+            st.session_state.search_config = {
+                'search_type': 'mmr',
+                'k': 10,
+                'fetch_k': 20,
+                'lambda_mult': 0.5,
+                'score_threshold': 0.4
+            }
+        
+        # Configurações de geração
+        if 'generation_config' not in st.session_state:
+            st.session_state.generation_config = {
+                'temperature': 0.1,
+                'top_p': 0.9,
+                'top_k': 40,
+                'max_output_tokens': 8192,
+                'candidate_count': 1,
+                'stop_sequences': []  # Lista vazia por padrão
+            }
+
     init_session()
-
-    vector_store = carregar_vector_store()    
 
     def perform_web_search(query, num_results=5):
         try:
@@ -361,10 +382,10 @@ def main():
             
             return None
 
-    def gerar_resposta(query, vector_store, contexto_docs, historico, uploaded_files, campo, valor_campo):
+    def gerar_resposta(query, vector_store, contexto_docs, historico, uploaded_files, campo, valor_campo, model_name):
     
         try:
-                       
+                    
             contexto_completo = " "            
             retrieved_docs = []
             arquivos_texto = []
@@ -377,7 +398,7 @@ def main():
                     metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
                     arquivos_texto.append(f"{metadata_str}\n{doc.page_content}") # além dos metadados inclui o conteúdo dos documentos
                     metadados.append(doc.metadata)  # Adiciona metadados à lista de metadados com as informações dos documentos
-                     
+                    
             elif uploaded_files:                   
 
                 for doc in uploaded_files:
@@ -392,16 +413,20 @@ def main():
                         metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
                         arquivos_texto.append(f"{metadata_str}\n{doc.page_content}") # será utilizado no contexto não se é o melhor
                         metadados.append(doc.metadata)  # Adiciona metadados à lista                                                                           
-           
+        
             elif campo == "classe" and valor_campo:
+                # USAR CONFIGURAÇÕES PERSONALIZADAS DO SESSION STATE
                 search_kwargs = {
-                    "k": 10,
-                    "fetch_k": 20,
-                    "lambda_mult": 0.5,
-                    "score_threshold": 0.4,
+                    "k": st.session_state.search_config['k'],
+                    "fetch_k": st.session_state.search_config['fetch_k'],
+                    "lambda_mult": st.session_state.search_config['lambda_mult'],
+                    "score_threshold": st.session_state.search_config['score_threshold'],
                     "filter": {campo: valor_campo}
                 }                
-                retriever = vector_store.as_retriever(search_type="mmr", search_kwargs=search_kwargs)
+                retriever = vector_store.as_retriever(
+                    search_type=st.session_state.search_config['search_type'], 
+                    search_kwargs=search_kwargs
+                )
                 retrieved_docs = retriever.invoke(query)
                 for doc in retrieved_docs:
                     metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
@@ -409,7 +434,25 @@ def main():
                     metadados.append(doc.metadata)  # Adiciona metadados à lista    
 
             else:
-                retriever = vector_store.as_retriever( search_type="similarity",  search_kwargs={"k": 5, "fetch_k": 300})               
+                # USAR CONFIGURAÇÕES PERSONALIZADAS PARA BUSCA GERAL
+                total_vectors = vector_store.index.ntotal
+                
+                # Preparar search_kwargs baseado no tipo de busca
+                search_kwargs = {
+                    "k": st.session_state.search_config['k'],
+                    "fetch_k": min(st.session_state.search_config['fetch_k'], total_vectors)  # Não exceder total
+                }
+                
+                # Adicionar parâmetros específicos do tipo de busca
+                if st.session_state.search_config['search_type'] == 'mmr':
+                    search_kwargs["lambda_mult"] = st.session_state.search_config['lambda_mult']
+                elif st.session_state.search_config['search_type'] == 'similarity_score_threshold':
+                    search_kwargs["score_threshold"] = st.session_state.search_config['score_threshold']
+                
+                retriever = vector_store.as_retriever(
+                    search_type=st.session_state.search_config['search_type'],
+                    search_kwargs=search_kwargs
+                )               
                 retrieved_docs = retriever.invoke(query)
                 for doc in retrieved_docs:
                     metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
@@ -417,32 +460,48 @@ def main():
                     metadados.append(doc.metadata)  # Adiciona metadados à lista    
             
             contexto_completo = "\n\n".join(arquivos_texto)
-           
+        
             prompt_template = """
                 Você é um {role}.
                 Tarefa: {task}
                 Contexto: {context}
                 Formato de saída: {output_format}
-
+                histórico:{history}
                 Pergunta: {question}
             """
 
             prompt = prompt_template.format(
                 role="Você é um assistente especialista em direito",
                 task="""Responda as perguntas do usuário sempre em português de forma clara""",
-                context= contexto_completo,
-                output_format="markdown com explicação",
+                context=contexto_completo,
+                output_format="markdown",
+                history=historico,
                 question=query
             )
-
-            llm = get_model(prompt)
-            response = llm.generate_content(prompt).text
             
-            return response
+            print(f"Modelo selecionado: {model_name}")
+            print(f"Configurações de busca: {st.session_state.search_config}")
+            print(f"Configurações de geração: {st.session_state.generation_config}")
+            
+            # USAR CONFIGURAÇÕES PERSONALIZADAS DE GERAÇÃO
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(
+                contents=prompt,
+                generation_config=st.session_state.generation_config,  # USAR CONFIG PERSONALIZADA
+                safety_settings=[
+                    {
+                        "category": "HARM_CATEGORY_HARASSMENT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                    }
+                ],
+                stream=False
+            )
+            
+            return response.text
             
         except Exception as e:
             return f"Erro ao gerar resposta: {str(e)}"
-        
+    
    
     def busca_combinada(vector_store, campo, valor_campo, texto_livre, num_results):
         
@@ -554,22 +613,45 @@ def main():
             with tab1:                 
                 expander_pesq = st.expander("🔍 Filtros de Busca", expanded=True)                
                 with expander_pesq:            
-                    query = texto_livre = st.text_input(
-                        "Texto Livre:", placeholder="Ex: termo1, termo2"
-                    )
-                
+                    texto_livre = st.text_input(
+                        "Texto Livre:", 
+                        placeholder="Ex: termo1, termo2",
+                        value=st.session_state.texto_livre_input,  
+                        key="texto_livre_key"  
+                     )
+                    # Atualizar o estado quando o valor mudar
+                    st.session_state.texto_livre_input = texto_livre
+                                 
                     campo = st.selectbox(
-                        "Campo:", [" ", "classe", "assunto"], help="Filtrar por campo"
+                        "Campo:", 
+                        [" ", "classe", "assunto"], 
+                        help="Filtrar por campo",
+                        index=[" ", "classe", "assunto"].index(st.session_state.campo_selecionado),  
+                        key="campo_key" 
                     )
+                    st.session_state.campo_selecionado = campo
+
                     valores = [] 
                     classes, assuntos = extrair_campos_unicos(vector_store)               
                 
                     if campo:                    
                         valores = classes if campo == "classe" else assuntos
                     
+                    # Garantir que o valor selecionado seja válido para a lista atual
+                    
+                    if st.session_state.valor_campo_selecionado not in [" "] + valores:
+                        st.session_state.valor_campo_selecionado = " "
+                    
                     valor_campo = st.selectbox(
-                        "Valor do Campo:", [" "] + valores, help="Selecione o valor do campo"                                              
+                        "Valor do Campo:",
+                        [" "] + valores, 
+                        help="Selecione o valor do campo",
+                        index=([" "] + valores).index(st.session_state.valor_campo_selecionado),  
+                        key="valor_campo_key"                                              
                     )
+
+                    # Atualizar o estado quando o valor mudar
+                    st.session_state.valor_campo_selecionado = valor_campo
                     
                     num_results = st.slider("Nº de Resultados:", 1, 20, 4)
 
@@ -577,7 +659,7 @@ def main():
                     with col1:
                         buscar = st.button("Buscar")
                         if buscar:
-                            if not any([query, campo and valor_campo, texto_livre]):
+                            if not any([texto_livre, campo and valor_campo, texto_livre]):
                                 st.warning("Especifique pelo menos um critério de busca.")
                             else:
                                 with st.spinner("Buscando..."):
@@ -663,13 +745,208 @@ def main():
                     # Atualizar o estado com o valor do toggle
                     st.session_state.use_juris_search = use_juris
                     use_web= False   
-                
+
+                    model = st.selectbox(
+                        "Modelo de IA:",
+                        ["learnlm-2.0-flash-experimental"] + models, 
+                        help="Selecione o tipo de modelo de llm",
+                        index=0,  
+                        key="model_key"                                              
+                    )
+
+                    # Atualizar o estado quando o valor mudar
+                    st.session_state.model_selecionado = model
+
+                    st.divider()
+        
+                    # Configurações de Busca
+                    st.markdown("**🔍 Configurações de Busca**")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        search_type = st.selectbox(
+                            "Tipo de Busca:",
+                            ["similarity", "mmr", "similarity_score_threshold"],
+                            index=["similarity", "mmr", "similarity_score_threshold"].index(
+                                st.session_state.search_config['search_type']
+                            ),
+                            help="Tipo de algoritmo de busca",
+                            key="search_type_key"
+                        )
+                        st.session_state.search_config['search_type'] = search_type
+                        
+                        k = st.number_input(
+                            "K (documentos retornados):",
+                            min_value=1,
+                            max_value=50,
+                            value=st.session_state.search_config['k'],
+                            help="Número de documentos a retornar",
+                            key="k_key"
+                        )
+                        st.session_state.search_config['k'] = k
+                        
+                        fetch_k = st.number_input(
+                            "Fetch K:",
+                            min_value=1,
+                            max_value=100,
+                            value=st.session_state.search_config['fetch_k'],
+                            help="Número de documentos para buscar antes da filtragem",
+                            key="fetch_k_key"
+                        )
+                        st.session_state.search_config['fetch_k'] = fetch_k
+                    
+                    with col2:
+                        lambda_mult = st.slider(
+                            "Lambda Mult:",
+                            min_value=0.0,
+                            max_value=1.0,
+                            value=st.session_state.search_config['lambda_mult'],
+                            step=0.1,
+                            help="Controla diversidade vs relevância (apenas para MMR)",
+                            key="lambda_mult_key"
+                        )
+                        st.session_state.search_config['lambda_mult'] = lambda_mult
+                        
+                        score_threshold = st.slider(
+                            "Score Threshold:",
+                            min_value=0.0,
+                            max_value=1.0,
+                            value=st.session_state.search_config['score_threshold'],
+                            step=0.1,
+                            help="Limiar mínimo de pontuação",
+                            key="score_threshold_key"
+                        )
+                        st.session_state.search_config['score_threshold'] = score_threshold
+                    
+                    st.divider()
+                    
+                    # Configurações de Geração
+                    st.markdown("**🤖 Configurações de Geração**")
+                    
+                    col3, col4 = st.columns(2)
+                    
+                    with col3:
+                        temperature = st.slider(
+                            "Temperature:",
+                            min_value=0.0,
+                            max_value=2.0,
+                            value=st.session_state.generation_config['temperature'],
+                            step=0.1,
+                            help="Controla a criatividade da resposta",
+                            key="temperature_key"
+                        )
+                        st.session_state.generation_config['temperature'] = temperature
+                        
+                        top_p = st.slider(
+                            "Top P:",
+                            min_value=0.0,
+                            max_value=1.0,
+                            value=st.session_state.generation_config['top_p'],
+                            step=0.1,
+                            help="Nucleus sampling",
+                            key="top_p_key"
+                        )
+                        st.session_state.generation_config['top_p'] = top_p
+                        
+                        top_k = st.number_input(
+                            "Top K:",
+                            min_value=1,
+                            max_value=100,
+                            value=st.session_state.generation_config['top_k'],
+                            help="Top-k sampling",
+                            key="top_k_key"
+                        )
+                        st.session_state.generation_config['top_k'] = top_k
+                    
+                    with col4:
+                        max_output_tokens = st.number_input(
+                            "Max Output Tokens:",
+                            min_value=100,
+                            max_value=32000,
+                            value=st.session_state.generation_config['max_output_tokens'],
+                            step=100,
+                            help="Máximo de tokens na resposta",
+                            key="max_tokens_key"
+                        )
+                        st.session_state.generation_config['max_output_tokens'] = max_output_tokens
+                        
+                        candidate_count = st.number_input(
+                            "Candidate Count:",
+                            min_value=1,
+                            max_value=5,
+                            value=st.session_state.generation_config['candidate_count'],
+                            help="Número de candidatos de resposta",
+                            key="candidate_count_key"
+                        )
+                        st.session_state.generation_config['candidate_count'] = candidate_count
+                        
+                        stop_sequences = st.text_area(
+                            "Stop Sequences:",
+                            value="\n".join(st.session_state.generation_config['stop_sequences']),
+                            help="Sequências que param a geração (uma por linha)",
+                            key="stop_sequences_key"
+                        )
+                        # Converter texto em lista
+                        st.session_state.generation_config['stop_sequences'] = [
+                            seq.strip() for seq in stop_sequences.split('\n') if seq.strip()
+                        ]
+                    
+                    st.divider()
+                    
+                    # Botões de controle
+                    col5, col6, col7 = st.columns(3)
+                    
+                    with col5:
+                        if st.button("🔄 Resetar Configurações", key="reset_config"):
+                            # Resetar para valores padrão
+                            st.session_state.search_config = {
+                                'search_type': 'mmr',
+                                'k': 10,
+                                'fetch_k': 20,
+                                'lambda_mult': 0.5,
+                                'score_threshold': 0.4
+                            }
+                            st.session_state.generation_config = {
+                                'temperature': 0.1,
+                                'top_p': 0.9,
+                                'top_k': 40,
+                                'max_output_tokens': 8192,
+                                'candidate_count': 1,
+                                'stop_sequences': []
+                            }
+                            st.rerun()
+                    
+                    with col6:
+                        if st.button("💾 Salvar Config", key="save_config"):
+                            # Salvar configurações em arquivo (opcional)
+                            config_data = {
+                                'search_config': st.session_state.search_config,
+                                'generation_config': st.session_state.generation_config
+                            }
+                            with open('user_config.json', 'w') as f:
+                                json.dump(config_data, f, indent=2)
+                            st.success("Configurações salvas!")
+                    
+                    with col7:
+                        if st.button("📁 Carregar Config", key="load_config"):
+                            # Carregar configurações de arquivo (opcional)
+                            try:
+                                with open('user_config.json', 'r') as f:
+                                    config_data = json.load(f)
+                                st.session_state.search_config = config_data['search_config']
+                                st.session_state.generation_config = config_data['generation_config']
+                                st.success("Configurações carregadas!")
+                                st.rerun()
+                            except FileNotFoundError:
+                                st.warning("Arquivo de configuração não encontrado!")
+                            
            
         with colChatbot:
             # # Área principal do chat
             # st.markdown("""<center><h2> 💬 Chat Assistente Jurídico</h2><center>""", unsafe_allow_html= True)
 
-            containerChatbot= st.container(height=800, border=True)
+            containerChatbot= st.container(height=700, border=True)
             
             with containerChatbot:
 
@@ -703,7 +980,8 @@ def main():
                                                     st.session_state.chat_history, 
                                                     st.session_state.uploaded_files 
                                                     , filterName,
-                                                    filterValue                                                 
+                                                    filterValue,
+                                                    st.session_state.model_selecionado                                                 
                                                     )         
                         #resposta = st.session_state.chat_session.send_message(prompt_formatado) #, history=st.session_state.chat_history  
                         resposta = prompt_formatado # Resposta formatada
