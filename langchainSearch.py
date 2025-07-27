@@ -725,26 +725,7 @@ def main():
             with tab3:
                 with st.expander("⚙️ Configurações", expanded=True):
                 
-                    use_web = st.toggle(
-                        "Habilitar busca na internet",
-                        value=st.session_state.use_web_search,
-                        help="Ative para permitir que o assistente busque informações atualizadas na internet",
-                        key='web_search_toggle'  # Adicionando uma key única
-                    )
-                    # Atualizar o estado com o valor do toggle
-                    st.session_state.use_web_search = use_web
-                    use_juris= False            
-                    
-                    
-                    use_juris = st.toggle(
-                        "Habilitar busca de jurisprudência",
-                        value=st.session_state.use_juris_search,
-                        help="Ative para permitir que o assistente busque informações de jurisprudência no site jusbrasil",
-                        key='juris_search_toggle'  # Adicionando uma key única
-                    )
-                    # Atualizar o estado com o valor do toggle
-                    st.session_state.use_juris_search = use_juris
-                    use_web= False   
+                     
 
                     model = st.selectbox(
                         "Modelo de IA:",
