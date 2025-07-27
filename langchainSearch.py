@@ -945,7 +945,7 @@ def main():
             # # Área principal do chat
             # st.markdown("""<center><h2> 💬 Chat Assistente Jurídico</h2><center>""", unsafe_allow_html= True)
 
-            containerChatbot= st.container(height=700, border=True)
+            containerChatbot= st.container(height=600, border=True)
             
             with containerChatbot:
 
