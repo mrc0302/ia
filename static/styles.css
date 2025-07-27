@@ -26,9 +26,9 @@ footer {
 }
 div[data-testid="stChatMessage"] {
     
-    /* border: 1px solid #dee2e6 !important; 
-    border-radius: 1rem !important;*/
-    /*padding: 1.5rem !important;*/
+    border: 1px solid #dee2e6 !important; 
+    border-radius: 1rem !important;
+    padding: 1.5rem !important;
     border: none !important;
     box-shadow: none !important;
     background: none !important;
@@ -388,8 +388,8 @@ details[data-testid="stExpander"] > div {
 @media (max-width: 768px) {
     [data-testid="stChatInputTextArea"] {
         font-size: 16px !important;
-        /* padding: 14px 16px !important;
-        min-height: 70px !important; */
+        padding: 14px 16px !important;
+        min-height: 70px !important; 
     }
     
     [data-testid="stChatInputTextArea"]::placeholder {
@@ -418,7 +418,7 @@ details[data-testid="stExpander"] > div {
 @media (max-width: 480px) {
     [data-testid="stChatInputTextArea"] {
         font-size: 15px !important;
-       /* padding: 12px 14px !important;*/
+        padding: 12px 14px !important;
         min-height: 60px !important;
     }
     
