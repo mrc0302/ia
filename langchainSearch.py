@@ -32,18 +32,18 @@ from langchain.schema import Document
 from langchain.chains import create_retrieval_chain
 
 
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def main():
 
-    # Configuração da página
-    st.set_page_config(
-        page_title="Sistema de Modelos Judiciais",
-        page_icon="🧊", 
-        layout="wide",  
-        initial_sidebar_state="expanded"
-    )
+    # # Configuração da página
+    # st.set_page_config(
+    #     page_title="Sistema de Modelos Judiciais",
+    #     page_icon="🧊", 
+    #     layout="wide",  
+    #     initial_sidebar_state="expanded"
+    # )
     
     def load_css(file_name):
         with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
@@ -466,13 +466,13 @@ def main():
                 Tarefa: {task}
                 Contexto: {context}
                 Formato de saída: {output_format}
-                histórico:{history}
+                só utilize o histórico:{history} se for pedido ou necessário para resposta
                 Pergunta: {question}
             """
 
             prompt = prompt_template.format(
                 role="Você é um assistente especialista em direito",
-                task="""Responda as perguntas do usuário sempre em português de forma clara""",
+                task="""Responda as perguntas do usuário sempre em português de forma clara. forneça sempre o nome do ASSUNTO entre []""",
                 context=contexto_completo,
                 output_format="markdown",
                 history=historico,
@@ -606,9 +606,9 @@ def main():
    
     if vector_store:
         # Sidebar
-        colSideBAr, colChatbot = st.columns([1, 20])
-        #with colSideBAr:
-        with st.sidebar:            
+        colSideBAr, colChatbot = st.columns([1, 4])
+        with colSideBAr:
+        #with st.sidebar:            
             tab1, tab2, tab3 = st.tabs(["Pesquisa", "Arquivos","Configurações"])
             with tab1:                 
                 expander_pesq = st.expander("🔍 Filtros de Busca", expanded=True)                
@@ -940,8 +940,7 @@ def main():
                                 st.rerun()
                             except FileNotFoundError:
                                 st.warning("Arquivo de configuração não encontrado!")
-                            
-           
+                                       
         with colChatbot:
             # # Área principal do chat
             # st.markdown("""<center><h2> 💬 Chat Assistente Jurídico</h2><center>""", unsafe_allow_html= True)
