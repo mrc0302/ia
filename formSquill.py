@@ -28,7 +28,13 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger('FormSquill')
 
 def main():
+    def load_css(file_name):
+        with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+    load_css("styles.css")   
+   
+    
     def transform_results_to_items(results):
         # Agrupar por classe
         classes = {}
@@ -502,9 +508,10 @@ def main():
         # Botão de pesquisa
         if st.button("🔍 Pesquisar", type="primary", key="search"):
             execute_search()
-
+        
+        
         # Container para resultados da pesquisa
-        container = st.container(height=500, key="container")    
+        container = st.container(height=500, key="container", border=False)    
     
         with container:
             if st.session_state.search_results is not None:
@@ -527,11 +534,11 @@ def main():
 
     with col2:
         with st.form(key="form"):
-            st.markdown("<h4 style='text-align: center; margin-top: -2rem; margin-bottom:0px'>📝Modelos de decisões judiciais</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; margin-top: -10rem; margin-bottom:0px'>📝Modelos de decisões judiciais</h4>", unsafe_allow_html=True)
             assunto = st.text_input("Assunto:", value=st.session_state.form_assunto)
             classe = st.text_input("Classe:", value=st.session_state.form_classe)
                        
-            with st.container(height=600, border=True):
+            with st.container(height=600, border=False):
                 toolbar = {
                     'container': [
                         [{'header': [1, 2, 3, 4, 5, 6, False]}],
