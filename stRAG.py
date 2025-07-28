@@ -14,38 +14,12 @@ import shutil
 
 def main():
     # Configurar estilo CSS para ajustar o tamanho da fonte em toda a aplicação
-    st.markdown("""
-    <style>
-        html, body, [class*="st-"], .stMarkdown, .css-18e3th9, .css-1d391kg, p, div, span {
-            font-size: 16px !important;
-        }
-        h1 {
-            font-size: 24px !important;
-        }
-        h2, h3 {
-            font-size: 20px !important;
-        }
-        h4, h5, h6 {
-            font-size: 18px !important;
-        }
-        .stAlert p {
-            font-size: 16px !important;
-        }
-        .stButton button {
-            font-size: 16px !important;
-        }
-        code, pre {
-            font-size: 15px !important;
-        }
-        label, .stTextInput, .stTextArea, textarea, input {
-            font-size: 16px !important;
-        }
-        .streamlit-expanderHeader {
-            font-size: 16px !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    
+ 
+    def load_css(file_name):
+        with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+    load_css("static/styles.css")  
     st.title("RAG Legal App com Gemma-3-27b-it")
     
     # Inicializar estado da sessão
