@@ -1,10 +1,10 @@
-import cloudscraper
-from bs4 import BeautifulSoup
+import asyncio
+import nest_asyncio
 import time
-import logging
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
 from PyPDF2 import PdfReader
+import sqlite3
 import csv
 import docx
 from googlesearch import search
@@ -31,20 +31,16 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.schema import Document
 from langchain.chains import create_retrieval_chain
 
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 def main():
 
-    # # Configuração da página
-    # st.set_page_config(
-    #     page_title="Sistema de Modelos Judiciais",
-    #     page_icon="🧊", 
-    #     layout="wide",  
-    #     initial_sidebar_state="expanded"
-    # )
-    
+    # Configuração da página
+    #st.set_page_config(
+     #   page_title="Sistema de Modelos Judiciais",
+      #  page_icon="🧊", 
+       # layout="wide",  
+        #initial_sidebar_state="expanded"
+    #)
+
     def load_css(file_name):
         with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -62,6 +58,7 @@ def main():
         "gemini-1.5-flash",
         "gemini-2.0-flash",              # Mais rápido
         "learnlm-2.0-flash-experimental", # Seu modelo atual
+        "gemini-2.0-flash-thinking-exp-01-21",
         "gemma-3n-e2b-it",
         "gemma-3n-e4b-it",
         "gemma-3-1b-it",
@@ -72,7 +69,8 @@ def main():
         "gemini-2.0-flash-lite",
         "gemini-2.5-pro",
         "gemini-2.5-flash",
-        "gemini-2.5-flash-lite"
+        "gemini-2.5-flash-lite",
+        
 
         
     ]
@@ -83,32 +81,37 @@ def main():
         "application/json", # JSON
         "text/markdown"   # Markdown
     ]
- 
-    model = genai.GenerativeModel(model_name="learnlm-2.0-flash-experimental")
-
-    def get_model(prompt, model_name="learnlm-2.0-flash-experimental"):
-        model = genai.GenerativeModel(model_name)
-        model.generate_content(
-            contents=prompt,  # ou apenas o primeiro parâmetro
-            generation_config={
-                "temperature": 0.1,        # Criatividade (0.0-2.0)
-                "top_p": 0.9,             # Nucleus sampling
-                "top_k": 40,              # Top-k sampling
-                "max_output_tokens": 8192, # Limite de tokens
-                "candidate_count": 1,      # Número de respostas
-                "stop_sequences": ["\n"]   # Sequências de parada
-            },
-            safety_settings=[
-                {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                }
-            ],
-            stream=False  # Para streaming de resposta
-        )
-        return model
+    # Create the model
+    generation_config = {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 64,
+        "max_output_tokens": 8024,
+        "response_mime_type":  "text/plain" ,
+        
+        
+   }
+    model_name="learnlm-2.0-flash-experimental"
+    model = genai.GenerativeModel(model_name=model_name)
     
-   
+    llm2 = GoogleGenerativeAI(
+            model=model_name,
+            google_api_key=google_api_key,
+            temperature=0.7,
+            generation_config=generation_config,
+            
+
+        )
+    
+    llm3 = ChatGoogleGenerativeAI(
+        model=model_name,
+        temperature=0,
+        google_api_key=google_api_key,
+        generation_config=generation_config,
+        
+        
+    )
+
     def get_mq_retriever(vector_store, llm):
                 
         # Retriever básico
@@ -163,7 +166,96 @@ def main():
         """Limpa apenas os arquivos carregados, mantendo o chat"""
         st.session_state.uploaded_files = []
 
-    
+    def converter_sqlite_para_vectorstore():
+        """
+        Função integrada para converter SQLite para FAISS Vector Store
+        """
+        try:
+            import sqlite3
+            
+            # Parâmetros
+            db_path = "bdProjetoForense.db"
+            vectordb_path = "vectordb"
+            
+            if not os.path.exists(db_path):
+                st.error(f"Arquivo do banco de dados não encontrado: {db_path}")
+                return None
+            
+            with st.spinner("Conectando ao banco de dados..."):
+                # Conectar ao SQLite
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                
+                # Buscar dados
+                cursor.execute("SELECT id, assunto, classe, texto, img, html FROM tbAssunto")
+                rows = cursor.fetchall()
+                conn.close()
+            
+            if not rows:
+                st.error("Nenhum dado encontrado na tabela 'tbAssunto'")
+                return None
+            
+            st.success(f"Encontrados {len(rows)} registros")
+            
+            with st.spinner("Criando documentos..."):
+                documents = []
+                for row in rows:
+                    id_doc, assunto, classe, texto, img, html = row
+                    
+                    # Combinar conteúdo
+                    content_parts = []
+                    if texto:
+                        content_parts.append(texto)
+                    if html:
+                        content_parts.append(html)
+                    
+                    if not content_parts:
+                        continue
+                    
+                    page_content = "\n\n".join(content_parts)
+                    
+                    metadata = {
+                        "id": id_doc,
+                        "assunto": assunto or "Não especificado",
+                        "classe": classe or "Não especificado", 
+                        "img": img or "",
+                        "texto": texto or ""
+                    }
+                    
+                    doc = Document(page_content=page_content, metadata=metadata)
+                    documents.append(doc)
+            
+            if not documents:
+                st.error("Nenhum documento válido criado")
+                return None
+            
+            with st.spinner("Dividindo documentos em chunks..."):
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=800,
+                    chunk_overlap=200,
+                    length_function=len,
+                    separators=["\n\n", "\n", ".", " ", ""]
+                )
+                chunks = text_splitter.split_documents(documents)
+            
+            with st.spinner("Criando vector store FAISS..."):
+                embeddings = get_embeddings()
+                vector_store = FAISS.from_documents(chunks, embeddings)
+                
+                # Salvar
+                os.makedirs(vectordb_path, exist_ok=True)
+                vector_store.save_local(vectordb_path)
+            
+            st.success(f"✅ Vector store criado com sucesso!")
+            st.info(f"📁 Salvo em: {os.path.abspath(vectordb_path)}")
+            st.info(f"📊 Documentos: {len(documents)} | Chunks: {len(chunks)}")
+            
+            return vector_store
+        
+        except Exception as e:
+            st.error(f"Erro na conversão: {str(e)}")
+            return None
+        
     def extract_text_from_pdf(pdf_file):
         pdf_reader = PdfReader(pdf_file)
         text = ""
@@ -228,12 +320,23 @@ def main():
     @st.cache_resource
     def carregar_vector_store():
         try:
+            # Tentar obter o loop atual ou criar um novo
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                # Se não há loop, criar um novo
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # Permitir loops aninhados
+            nest_asyncio.apply()
+            
             embeddings = GoogleGenerativeAIEmbeddings(
                 model="models/embedding-001",
                 google_api_key=google_api_key
             )
             return FAISS.load_local(
-                "faiss_legal_store_gemini", 
+                "vectordb", 
                 embeddings, 
                 allow_dangerous_deserialization=True
             )
@@ -280,7 +383,10 @@ def main():
             st.session_state.texto_livre_input = ""
 
         if 'model_selecionado' not in st.session_state: 
-            st.session_state.model_selecionado = "learnlm-2.0-flash-experimental"
+            st.session_state.model_selecionado = model_name
+        
+        if 'on_sqlite_troggle' not in st.session_state:
+            st.session_state.on_sqlite_troggle = False
         
         # Configurações de busca
         if 'search_config' not in st.session_state:
@@ -382,14 +488,93 @@ def main():
             
             return None
 
+    llm = ChatGoogleGenerativeAI(
+    model="gemma-3n-e2b-it",
+    temperature=0,
+    google_api_key=google_api_key,
+    
+)
+
+    def limpar_query(query_suja):
+        query_limpa = query_suja.strip()
+        query_limpa = query_limpa.replace('```sqlite', '').replace('```sql', '').replace('```', '')
+        query_limpa = query_limpa.strip()
+        return query_limpa
+
+
+    def searchSQL(pergunta):      
+
+        # Criar gerador de query
+        #write_query = create_sql_query_chain(llm, db)
+        
+        llm = ChatGoogleGenerativeAI(
+            model="gemma-3n-e2b-it",
+            temperature=0,
+            google_api_key=google_api_key,
+            
+        )
+        prompt_template = """
+                Você é um {role}.
+                Tarefa: {task}
+                Contexto: {context}                
+                Pergunta: {question}
+            """
+
+        prompt = prompt_template.format(
+            role="Você é um assistente especialista em gerar instruções SQL em banco de dados Sqlite",
+            task="""converta em a pergunta do usuário em uma instrução sql para o banco de dados, fornecendo apenas a query SQL, sem explicações adicionais. Tabela : tbAssunto Colunas: id, Classe, Assunto, Texto""",
+            question=pergunta,
+            context=""
+        )
+
+        conn = sqlite3.connect("bdProjetoForense.db")
+
+        conn.row_factory = sqlite3.Row  # ✨ Esta linha é a solução!
+        
+        cursor = conn.cursor()
+
+        # # Chamar o llm diretamente com uma string
+        llm_response = llm.invoke(prompt)
+        print()
+        print(llm_response.content) # Use .content para obter o texto da resposta
+
+        resultado= limpar_query(llm_response.content)
+
+
+        cursor.execute(resultado)  # Executar a query gerada
+
+        results = cursor.fetchall()  # Obter todos os resultados
+
+        metadados = []  # Lista para armazenar metadados
+        
+        print(len(results))
+        
+        if results:            
+            for i, col in enumerate(results):
+
+               print(f"Índice {i}: {col[0]}")
+               metadado_src = (f"""[id : {col[0]}  - CLASSE  {col[1]} - ASSUNTO : {col[2]}
+                                TEXTO : {col[3]}""")
+               metadados.append(metadado_src)
+        
+        return metadados  
+          
     def gerar_resposta(query, vector_store, contexto_docs, historico, uploaded_files, campo, valor_campo, model_name):
     
         try:
-                    
+
+            llm_ = GoogleGenerativeAI(
+            model=st.session_state.model_selecionado,
+            google_api_key=google_api_key,
+            temperature=0.7,
+            generation_config=generation_config,
+            
+            )   
             contexto_completo = " "            
             retrieved_docs = []
             arquivos_texto = []
             metadados = []  # Lista para armazenar metadados
+            on_sqlite_troggle= st.session_state.on_sqlite_troggle
 
             if contexto_docs: # são os documentos da consultas                
                 retrieved_docs = contexto_docs
@@ -398,11 +583,14 @@ def main():
                     metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
                     arquivos_texto.append(f"{metadata_str}\n{doc.page_content}") # além dos metadados inclui o conteúdo dos documentos
                     metadados.append(doc.metadata)  # Adiciona metadados à lista de metadados com as informações dos documentos
-                    
+            
+            elif on_sqlite_troggle:
+
+                arquivos_texto= searchSQL(query)
+                
             elif uploaded_files:                   
 
                 for doc in uploaded_files:
-
                     doc_obj = Document(
                         page_content=doc['content'], 
                         metadata={'name': doc['name'], 'type': doc['type']}
@@ -434,70 +622,51 @@ def main():
                     metadados.append(doc.metadata)  # Adiciona metadados à lista    
 
             else:
-                # USAR CONFIGURAÇÕES PERSONALIZADAS PARA BUSCA GERAL
-                total_vectors = vector_store.index.ntotal
-                
-                # Preparar search_kwargs baseado no tipo de busca
-                search_kwargs = {
-                    "k": st.session_state.search_config['k'],
-                    "fetch_k": min(st.session_state.search_config['fetch_k'], total_vectors)  # Não exceder total
-                }
-                
-                # Adicionar parâmetros específicos do tipo de busca
-                if st.session_state.search_config['search_type'] == 'mmr':
-                    search_kwargs["lambda_mult"] = st.session_state.search_config['lambda_mult']
-                elif st.session_state.search_config['search_type'] == 'similarity_score_threshold':
-                    search_kwargs["score_threshold"] = st.session_state.search_config['score_threshold']
-                
-                retriever = vector_store.as_retriever(
-                    search_type=st.session_state.search_config['search_type'],
-                    search_kwargs=search_kwargs
-                )               
-                retrieved_docs = retriever.invoke(query)
+               
+               
+                mq_retriever = MultiQueryRetriever.from_llm(
+                            retriever=vector_store.as_retriever(search_kwargs={"k": 10}),
+                            llm=llm_
+                )         
+
+                arquivos_texto = [] 
+                metadados = []  # Lista para armazenar os metadados dos documentos
+                # Recuperar documentos relevantes
+                retrieved_docs = mq_retriever.get_relevant_documents(query=query, k=10)
+
                 for doc in retrieved_docs:
-                    metadata_str = f"[Classe: {doc.metadata.get('classe', 'N/A')}, Assunto: {doc.metadata.get('assunto', 'N/A')}]"
-                    arquivos_texto.append(f"{metadata_str}\n{doc.page_content}")
-                    metadados.append(doc.metadata)  # Adiciona metadados à lista    
-            
+                    
+
+                    metadata_str = (f"""[id : {doc.metadata.get('id', 'N/A')}  - CLASSE  {doc.metadata.get('classe', 'N/A')} - ASSUNTO : {doc.metadata.get('assunto', 'N /A')}
+                                TEXTO : {doc.metadata.get('texto', 'N /A')} - HTML {doc.metadata.get('html', 'N/A')}""")
+                    
+                    arquivos_texto.append(f"{metadata_str}") # além dos metadados inclui o conteúdo dos documentos
+                # metadados.append(doc.metadata)  # Adiciona metadados à lista de metadados com as informações dos documentos
+                
+                #contexto_completo = "\n\n".join([doc.page_content for doc in retrieved_docs])
             contexto_completo = "\n\n".join(arquivos_texto)
-        
+                                    
             prompt_template = """
                 Você é um {role}.
                 Tarefa: {task}
                 Contexto: {context}
-                Formato de saída: {output_format}
+                output_format: {output_format}
                 só utilize o histórico:{history} se for pedido ou necessário para resposta
                 Pergunta: {question}
             """
 
             prompt = prompt_template.format(
                 role="Você é um assistente especialista em direito",
-                task="""Responda as perguntas do usuário sempre em português de forma clara. forneça sempre o nome do ASSUNTO entre []""",
+                task="""Responda as perguntas do usuário sempre em português de forma clara COM BASE NO CONTEXTO. SEMPRE forneça A DESCRIÇÃO DO ASSUNTO entre []""",
                 context=contexto_completo,
-                output_format="markdown",
+                output_format="formate TEXTO PLANO . não use html", 
                 history=historico,
                 question=query
-            )
+            ) 
+                     
+            response = llm_.invoke(prompt)
             
-            print(f"Modelo selecionado: {model_name}")
-            print(f"Configurações de busca: {st.session_state.search_config}")
-            print(f"Configurações de geração: {st.session_state.generation_config}")
-            
-            # USAR CONFIGURAÇÕES PERSONALIZADAS DE GERAÇÃO
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(
-                contents=prompt,
-                generation_config=st.session_state.generation_config,  # USAR CONFIG PERSONALIZADA
-                safety_settings=[
-                    {
-                        "category": "HARM_CATEGORY_HARASSMENT",
-                        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                    }
-                ],
-                stream=False
-            )
-            
-            return response.text
+            return str(response)  # Trabalha com o modelo de geração de texto
             
         except Exception as e:
             return f"Erro ao gerar resposta: {str(e)}"
@@ -721,15 +890,29 @@ def main():
                     else:
                         # Se não há arquivos no uploader, limpar o estado também
                         st.session_state.uploaded_files = []
+
+                    # No seu código Streamlit, adicione na sidebar:
+                    if st.button("🔄 Converter banco de dados SQLite para vectorstore FAISS"):
+                        vector_store = converter_sqlite_para_vectorstore()
+                        if vector_store:
+                            st.session_state.vector_store = vector_store
+                            st.rerun()
                
+                    on_sqlite_troggle= st.toggle("Activate feature",
+                        key="on_sqlite_troggle_key",
+                        help="Ativar ou desativar a conversão do banco de dados SQLite para vectorstore FAISS",
+                        value= st.session_state.on_sqlite_troggle)
+                    if on_sqlite_troggle:
+                        st.session_state.on_sqlite_troggle = True
+                    else:   
+                        st.session_state.on_sqlite_troggle = False
+
             with tab3:
                 with st.expander("⚙️ Configurações", expanded=True):
                 
-                     
-
                     model = st.selectbox(
                         "Modelo de IA:",
-                        ["learnlm-2.0-flash-experimental"] + models, 
+                        ["gemini-2.0-flash-thinking-exp-01-21"] + models, 
                         help="Selecione o tipo de modelo de llm",
                         index=0,  
                         key="model_key"                                              
@@ -844,7 +1027,7 @@ def main():
                         max_output_tokens = st.number_input(
                             "Max Output Tokens:",
                             min_value=100,
-                            max_value=32000,
+                            max_value= 8192,
                             value=st.session_state.generation_config['max_output_tokens'],
                             step=100,
                             help="Máximo de tokens na resposta",
@@ -926,7 +1109,7 @@ def main():
             # # Área principal do chat
             # st.markdown("""<center><h2> 💬 Chat Assistente Jurídico</h2><center>""", unsafe_allow_html= True)
 
-            containerChatbot= st.container(height=500, border=True)
+            containerChatbot= st.container(height=700, border=True)
             
             with containerChatbot:
 
