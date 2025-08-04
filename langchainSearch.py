@@ -40,11 +40,11 @@ def main():
         #initial_sidebar_state="expanded"
     #)
 
-    def load_css(file_name):
-        with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    #def load_css(file_name):
+     #   with open(file_name, encoding='utf-8') as f:  # Adicione encoding='utf-8'
+      #      st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    load_css("static/styles.css")  
+    #load_css("static/styles.css")  
 
         # Carregar variáveis de ambiente
     load_dotenv()
@@ -97,8 +97,7 @@ def main():
             model=model_name,
             google_api_key=google_api_key,
             temperature=0.7,
-            generation_config=generation_config,
-            
+            generation_config=generation_config,        
 
         )
     
@@ -1168,4 +1167,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
