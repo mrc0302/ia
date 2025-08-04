@@ -97,8 +97,6 @@ def main():
             model=model_name,
             google_api_key=google_api_key,
             temperature=0.7,
-            generation_config=generation_config,        
-
         )
     
     llm3 = ChatGoogleGenerativeAI(
@@ -1167,5 +1165,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
