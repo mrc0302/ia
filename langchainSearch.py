@@ -96,16 +96,13 @@ def main():
     llm2 = GoogleGenerativeAI(
             model=model_name,
             google_api_key=google_api_key,
-            temperature=0.7,
+            temperature=0.7
         )
     
     llm3 = ChatGoogleGenerativeAI(
         model=model_name,
         temperature=0,
-        google_api_key=google_api_key,
-        generation_config=generation_config,
-        
-        
+        google_api_key=google_api_key        
     )
 
     def get_mq_retriever(vector_store, llm):
@@ -1165,6 +1162,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
