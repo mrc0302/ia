@@ -1,5 +1,4 @@
-import asyncio
-import nest_asyncio
+
 import time
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
@@ -1169,3 +1168,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
