@@ -13,6 +13,9 @@ langchain-core>=0.3.0
 # Pydantic - versão 2 para compatibilidade com LangChain 0.3+
 pydantic>=2.0.0,<3.0.0
 
+# Programação Assíncrona
+nest-asyncio>=1.5.8
+
 # Ambiente e Configuração
 python-dotenv>=1.0.0
 
