@@ -1,6 +1,6 @@
 
-#import asyncio
-#import nest_asyncio
+import asyncio
+import nest_asyncio
 import time
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
@@ -57,8 +57,8 @@ def main():
     # Modelos disponíveis
     models = [
         "gemini-1.5-flash",
-        "gemini-2.0-flash",              # Mais rápido
-        "learnlm-2.0-flash-experimental", # Seu modelo atual
+        "gemini-2.0-flash",             
+        "learnlm-2.0-flash-experimental", 
         "gemini-2.0-flash-thinking-exp-01-21",
         "gemma-3n-e2b-it",
         "gemma-3n-e4b-it",
@@ -92,7 +92,7 @@ def main():
         
         
    }
-    model_name="learnlm-2.0-flash-experimental"
+    model_name="gemini-2.0-flash-thinking-exp-01-21"
     model = genai.GenerativeModel(model_name=model_name)
     
     llm2 = GoogleGenerativeAI(
@@ -378,7 +378,7 @@ def main():
             st.session_state.texto_livre_input = ""
 
         if 'model_selecionado' not in st.session_state: 
-            st.session_state.model_selecionado = model_name
+            st.session_state.model_selecionado ="gemini-2.0-flash-thinking-exp-01-21"
         
         if 'on_sqlite_troggle' not in st.session_state:
             st.session_state.on_sqlite_troggle = False
@@ -1164,6 +1164,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
