@@ -1,35 +1,46 @@
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
+# Google APIs e Autenticação
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.0.0
+google-generativeai>=0.8.0
 
-# Core Dependencies
-langchain>=0.1.0
-langchain-community>=0.0.10
-langchain-google-genai>=0.0.5
-google-generativeai>=0.3.0
+# LangChain Core - versões compatíveis
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-google-genai>=2.0.0
+langchain-core>=0.3.0
+
+# Pydantic - versão 2 para compatibilidade com LangChain 0.3+
+pydantic>=2.0.0,<3.0.0
+
+# Ambiente e Configuração
 python-dotenv>=1.0.0
 
-# Document Processing
+# Processamento de Documentos
 PyPDF2>=3.0.1
-python-docx>=0.8.11
+python-docx>=1.1.0
 
-# Web Scraping & Search
+# Web Scraping e Busca
 cloudscraper>=1.2.71
 beautifulsoup4>=4.12.2
 google>=3.0.0
 google-search-results>=2.4.2
+requests>=2.31.0
 
-# Vector Storage
-faiss-cpu>=1.7.4
+# Armazenamento Vetorial
+faiss-cpu>=1.8.0
+numpy>=1.24.0
 
-# UI
+# Interface de Usuário
 streamlit>=1.31.0
 streamlit-option-menu>=0.3.12
 streamlit-quill>=0.0.1
 
-# Utilities
-pypandoc
-pandas>=1.3.0
-
-
+# Utilitários
+pypandoc>=1.11
+pandas>=2.0.0
 psycopg2-binary==2.9.10
+
+# Dependências adicionais que podem resolver problemas de compatibilidade
+typing-extensions>=4.5.0
+protobuf>=4.21.0,<6.0.0
